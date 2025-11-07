@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { statusCalculator } from '../services/status-calculator.service.js';
-import { syntheticDataService } from '../services/synthetic-data.service.js';
+import { waterDataService } from '../services/water-data.service.js';
 import { ErrorHandler } from '../middleware/error-handler.middleware.js';
 
 const router = Router();
@@ -26,7 +26,7 @@ router.get('/status', ErrorHandler.asyncHandler(async (req: Request, res: Respon
 }));
 
 router.get('/risk-index', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-  const riskIndex = syntheticDataService.getWaterRiskIndex();
+  const riskIndex = waterDataService.getWaterRiskIndex();
   res.json({
     success: true,
     data: {
@@ -41,7 +41,7 @@ router.get('/risk-index', ErrorHandler.asyncHandler(async (req: Request, res: Re
 }));
 
 router.get('/chemicals', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-  const currentState = syntheticDataService.getCurrentState();
+  const currentState = waterDataService.getCurrentState();
   res.json({
     success: true,
     data: currentState.chemicals.map((chem) =>
@@ -68,7 +68,7 @@ router.post('/demo/attack', ErrorHandler.asyncHandler(async (req: Request, res: 
     });
   }
 
-  const success = syntheticDataService.triggerAttack(scenarioId);
+  const success = waterDataService.triggerAttack(scenarioId);
   
   if (!success) {
     return res.status(404).json({
@@ -84,7 +84,7 @@ router.post('/demo/attack', ErrorHandler.asyncHandler(async (req: Request, res: 
 }));
 
 router.post('/demo/reset', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-  syntheticDataService.resetToBaseline();
+  waterDataService.resetToBaseline();
   res.json({
     success: true,
     message: 'System reset to normal baseline',
@@ -92,10 +92,32 @@ router.post('/demo/reset', ErrorHandler.asyncHandler(async (req: Request, res: R
 }));
 
 router.get('/demo/scenarios', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-  const scenarios = syntheticDataService.getAttackScenarios();
+  const scenarios = waterDataService.getAttackScenarios();
   res.json({
     success: true,
     data: scenarios,
+  });
+}));
+
+router.get('/history', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const days = parseInt(req.query.days as string) || 7;
+  const limit = days * 24;
+  const history = waterDataService.getHistory(limit);
+  
+  const formattedHistory = history.map((point) => ({
+    timestamp: point.timestamp,
+    riskIndex: point.riskIndex,
+    chemicals: point.chemicals.map((chem) => ({
+      parameter: chem.parameter,
+      value: chem.value,
+      unit: chem.unit,
+      status: chem.status,
+    })),
+  }));
+  
+  res.json({
+    success: true,
+    data: formattedHistory,
   });
 }));
 

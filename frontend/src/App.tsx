@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import TwoFactorAuth from './components/TwoFactorAuth'
@@ -6,15 +6,31 @@ import CommunityLogin from './components/community/CommunityLogin'
 import CommunitySignup from './components/community/CommunitySignup'
 import AnomalyOverview from './pages/admin/AnomalyOverview'
 import WaterSafetyOverview from './pages/community/WaterSafetyOverview'
+import { auth } from './config/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 import './App.css'
 
 type Screen = 'login' | 'signup' | 'twofa-signup' | 'twofa-login' | 'success' | 'admin-dashboard' | 'community-dashboard' | 'community-login' | 'community-signup';
 type FlowType = 'signup' | 'login';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('login')
+  const [currentScreen, setCurrentScreen] = useState<Screen>('community-login')
   const [currentEmail, setCurrentEmail] = useState<string>('')
   const [flowType, setFlowType] = useState<FlowType>('login')
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsCheckingAuth(false)
+      if (user) {
+        setCurrentScreen('community-dashboard')
+      } else {
+        setCurrentScreen('community-login')
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const handleSignupSuccess = (email: string) => {
     setCurrentEmail(email)
@@ -99,6 +115,14 @@ function App() {
       </div>
     </div>
   )
+
+  if (isCheckingAuth) {
+    return (
+      <div className="app" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ color: '#a0a0a0' }}>Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="app">

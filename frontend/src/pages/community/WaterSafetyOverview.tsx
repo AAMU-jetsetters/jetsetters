@@ -7,6 +7,9 @@ import ReportIssueForm from '../../components/community/ReportIssueForm';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
 import MetricsPage from './MetricsPage';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import { useWaterData } from '../../hooks/useWaterData';
+import { useHistoricalData } from '../../hooks/useHistoricalData';
+import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
 import type { IssueData } from '../../components/community/ReportIssueForm';
 import './WaterSafetyOverview.css';
 
@@ -17,19 +20,18 @@ interface WaterSafetyOverviewProps {
 function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'metrics' | 'profile'>('home');
   const [showReportForm, setShowReportForm] = useState(false);
+  const [timeRange, setTimeRange] = useState<7 | 30 | 90>(7);
 
-  const trendData = [
-    { date: 'Nov 1', value: 7.6 },
-    { date: 'Nov 2', value: 7.8 },
-    { date: 'Nov 3', value: 7.7 },
-    { date: 'Nov 4', value: 7.9 },
-    { date: 'Nov 5', value: 7.8 },
-    { date: 'Nov 6', value: 7.6 },
-    { date: 'Nov 7', value: 7.8 },
-  ];
+  const { data: waterData, loading, error } = useWaterData();
+  const { chemicalTrends } = useHistoricalData(timeRange);
+
+  const pHTrendData = chemicalTrends.pH?.map((point) => ({
+    date: point.date,
+    value: point.value,
+  })) || [];
 
   const handleViewDetails = () => {
-    console.log('View health advisory details');
+    setActiveTab('metrics');
   };
 
   const handleContactUtility = () => {
@@ -79,28 +81,48 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
       <main className="page-content">
         {activeTab === 'home' && (
           <>
-            <StatusCard
-              riskLevel="Low Risk"
-              description="Water quality in your area currently indicates low risk. Continue to monitor updates for any changes."
-            />
+            {loading ? (
+              <div className="content-section">
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#a0a0a0' }}>
+                  Loading water status...
+                </div>
+              </div>
+            ) : error ? (
+              <div className="content-section">
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#ef4444' }}>
+                  Error: {error}
+                </div>
+              </div>
+            ) : waterData ? (
+              <>
+                <StatusCard
+                  riskLevel={mapRiskLevelToFrontend(waterData.overallRisk.level)}
+                  description={waterData.overallRisk.description}
+                />
 
-            <div className="content-section">
-              <HealthAdvisory
-                advisory="Local water sources are safe for consumption. However, children under 2 and immunocompromised individuals should boil water for 1 minute."
-                updatedAt="2024-07-26 10:30 AM"
-                onViewDetails={handleViewDetails}
-              />
-            </div>
+                <div className="content-section">
+                  <HealthAdvisory
+                    advisory={waterData.healthAdvisory.message}
+                    updatedAt={formatDate(waterData.healthAdvisory.updatedAt)}
+                    onViewDetails={handleViewDetails}
+                  />
+                </div>
 
-            <div className="content-section">
-              <HistoricalTrends
-                title="Water Quality Trend (pH Level)"
-                data={trendData}
-                timeRange="7days"
-                unit="pH"
-                variant="community"
-              />
-            </div>
+                <div className="content-section">
+                  <HistoricalTrends
+                    title="Water Quality Trend (pH Level)"
+                    data={pHTrendData}
+                    timeRange={`${timeRange}days` as '7days' | '30days' | '90days'}
+                    unit="pH"
+                    variant="community"
+                    onTimeRangeChange={(range) => {
+                      const days = parseInt(range.replace('days', '')) as 7 | 30 | 90;
+                      setTimeRange(days);
+                    }}
+                  />
+                </div>
+              </>
+            ) : null}
 
             <div className="content-section">
               <CommunityActions
