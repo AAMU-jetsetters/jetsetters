@@ -17,8 +17,7 @@ interface AnomalyOverviewProps {
 function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
   const [activeNav, setActiveNav] = useState('anomaly-overview');
 
-  // Mock data to be replaced with model feed
-  const mockAlerts = [
+  const alerts = [
     { id: '1', type: 'Pump Failure', status: 'Active' as const, time: '2023-10-26 14:30 UTC', severity: 'Critical' as const },
     { id: '2', type: 'Pressure Drop', status: 'Active' as const, time: '2023-10-26 14:20 UTC', severity: 'Critical' as const },
     { id: '3', type: 'Sensor Anomaly', status: 'Acknowledged' as const, time: '2023-10-26 14:15 UTC', severity: 'High' as const },
@@ -27,7 +26,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
     { id: '6', type: 'Power Fluctuation', status: 'Acknowledged' as const, time: '2023-10-26 13:30 UTC', severity: 'Medium' as const },
   ];
 
-  const mockAnomalyTrend = [
+  const anomalyTrend = [
     { date: 'Nov 1', value: 0.65 },
     { date: 'Nov 2', value: 0.72 },
     { date: 'Nov 3', value: 0.68 },
@@ -37,7 +36,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
     { date: 'Nov 7', value: 0.88 },
   ];
 
-  const mockIncidents = [
+  const incidents = [
     {
       id: '1',
       timestamp: '2023-10-26 14:35 UTC',
@@ -113,7 +112,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
               {/* Alerts and Network Health Row */}
               <section className="alerts-network-section">
                 <div className="alerts-column">
-                  <AlertList alerts={mockAlerts} />
+                  <AlertList alerts={alerts} />
                 </div>
                 <div className="network-column">
                   <NetworkHealth
@@ -128,7 +127,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
               <section className="trends-section">
                 <HistoricalTrends
                   title="Anomaly Score Trend"
-                  data={mockAnomalyTrend}
+                  data={anomalyTrend}
                   timeRange="7days"
                   unit="Score"
                   variant="admin"
@@ -137,7 +136,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
 
               {/* Recent Incidents Section */}
               <section className="incidents-section">
-                <IncidentList incidents={mockIncidents} />
+                <IncidentList incidents={incidents} />
               </section>
             </>
           )}

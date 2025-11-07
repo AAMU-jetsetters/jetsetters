@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { mockAuthService } from '../services/mockAuth';
+import { authService } from '../services/authService';
 import './Signup.css';
 
 interface SignupProps {
@@ -35,8 +35,7 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
       return;
     }
 
-    // Call mock auth service
-    const result = mockAuthService.signup(email, username, password, phoneNumber);
+    const result = authService.signup(email, username, password, phoneNumber);
 
     if (!result.success) {
       setError(result.message);

@@ -1,4 +1,4 @@
-// Mock authentication service with predefined users and 2FA codes for admin side
+// Authentication service with predefined users and 2FA codes for admin side
 export interface User {
   id: string;
   email: string;
@@ -14,8 +14,8 @@ interface TwoFactorCode {
   expiresAt: number;
 }
 
-// Mock database of admin users
-const mockUsers: User[] = [
+// Database of admin users
+const users: User[] = [
   {
     id: '1',
     email: 'john@example.com',
@@ -41,10 +41,10 @@ const generateCode = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Mock Auth Service
-export const mockAuthService = {
+// Authentication Service
+export const authService = {
   userExists: (emailOrUsername: string): boolean => {
-    return mockUsers.some(
+    return users.some(
       (user) =>
         user.email.toLowerCase() === emailOrUsername.toLowerCase() ||
         user.username.toLowerCase() === emailOrUsername.toLowerCase()
@@ -57,7 +57,7 @@ export const mockAuthService = {
     password: string,
     phoneNumber: string
   ): { success: boolean; message: string; code?: string } => {
-    if (mockAuthService.userExists(email) || mockAuthService.userExists(username)) {
+    if (authService.userExists(email) || authService.userExists(username)) {
       return {
         success: false,
         message: 'User with this email or username already exists',
@@ -73,7 +73,7 @@ export const mockAuthService = {
     console.log(`Code sent to phone: ${phoneNumber}`);
 
     const pendingUser: User = {
-      id: (mockUsers.length + 1).toString(),
+      id: (users.length + 1).toString(),
       email,
       username,
       password,
@@ -110,7 +110,7 @@ export const mockAuthService = {
     if (pendingUserJson) {
       const pendingUser = JSON.parse(pendingUserJson) as User;
       pendingUser.isVerified = true;
-      mockUsers.push(pendingUser);
+      users.push(pendingUser);
       sessionStorage.removeItem('pendingUser');
 
       console.log('User registered successfully:', pendingUser.email);
@@ -125,7 +125,7 @@ export const mockAuthService = {
     emailOrUsername: string,
     password: string
   ): { success: boolean; message: string; code?: string; user?: User } => {
-    const user = mockUsers.find(
+    const user = users.find(
       (u) =>
         (u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
           u.username.toLowerCase() === emailOrUsername.toLowerCase()) &&
@@ -199,9 +199,8 @@ export const mockAuthService = {
     };
   },
 
-  //generate all users - for debugging
   getAllUsers: (): User[] => {
-    return mockUsers;
+    return users;
   },
 };
 

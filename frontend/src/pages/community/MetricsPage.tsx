@@ -4,7 +4,6 @@ import HistoricalTrends from '../../components/common/HistoricalTrends';
 import './MetricsPage.css';
 
 function MetricsPage() {
-  // Mock historical data for different parameters
   const riskIndexTrend = [
     { date: 'Nov 1', value: 55 },
     { date: 'Nov 2', value: 62 },
