@@ -1,0 +1,215 @@
+.twofa-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #000000;
+  padding: 20px;
+}
+
+.twofa-card {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 48px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.twofa-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin: 0 0 16px 0;
+}
+
+.twofa-subtitle {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #a0a0a0;
+  text-align: center;
+  margin: 0 0 40px 0;
+  line-height: 1.5;
+}
+
+.twofa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.error-message {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+  width: 100%;
+  text-align: center;
+}
+
+.success-message {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+  width: 100%;
+  text-align: center;
+}
+
+.code-inputs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+}
+
+.code-input {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  width: 56px;
+  height: 56px;
+  text-align: center;
+  background-color: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  color: #ffffff;
+  transition: border-color 0.3s ease, transform 0.1s ease;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  transform: scale(1.05);
+}
+
+.code-input:not(:placeholder-shown) {
+  border-color: #a78bfa;
+}
+
+.submit-button {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 14px 32px;
+  background-color: #a78bfa;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  width: 100%;
+  max-width: 280px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #8b5cf6;
+}
+
+.submit-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resend-button {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: none;
+  color: #7c3aed;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 8px;
+}
+
+.resend-button:hover {
+  color: #a78bfa;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .twofa-card {
+    padding: 36px 28px;
+  }
+
+  .twofa-title {
+    font-size: 24px;
+  }
+
+  .twofa-subtitle {
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .code-inputs {
+    gap: 10px;
+  }
+
+  .code-input {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .twofa-card {
+    padding: 28px 20px;
+  }
+
+  .twofa-title {
+    font-size: 20px;
+  }
+
+  .twofa-subtitle {
+    font-size: 12px;
+    margin-bottom: 28px;
+  }
+
+  .code-inputs {
+    gap: 8px;
+  }
+
+  .code-input {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .submit-button {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+
+  .resend-button {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .code-inputs {
+    gap: 6px;
+  }
+
+  .code-input {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}
+

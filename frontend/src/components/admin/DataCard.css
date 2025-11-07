@@ -1,0 +1,128 @@
+.data-card {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.data-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.data-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.data-card-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+}
+
+.data-card-trend {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.trend-up {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.trend-down {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.trend-neutral {
+  color: #a0a0a0;
+  background-color: rgba(160, 160, 160, 0.1);
+}
+
+.data-card-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-icon {
+  font-size: 32px;
+}
+
+.status-badge {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-warning {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+.status-danger {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.status-success {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.status-info {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.data-card-value {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.data-card-detail {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.data-card-description {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .data-card {
+    padding: 16px;
+  }
+
+  .data-card-value {
+    font-size: 28px;
+  }
+
+  .status-badge {
+    font-size: 16px;
+  }
+}
+

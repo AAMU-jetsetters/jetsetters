@@ -1,0 +1,119 @@
+.log-data-panel {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+}
+
+.log-data-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.log-data-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'Ubuntu', monospace;
+}
+
+.log-data-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.log-data-content::-webkit-scrollbar-track {
+  background: #0a0a0a;
+  border-radius: 4px;
+}
+
+.log-data-content::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 4px;
+}
+
+.log-data-content::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+.log-entry {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  padding: 8px;
+  background-color: #0a0a0a;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  transition: border-left-color 0.2s ease;
+}
+
+.log-entry:hover {
+  background-color: #141414;
+}
+
+.log-timestamp {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+  color: #a0a0a0;
+}
+
+.log-level {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+}
+
+.level-critical {
+  color: #dc2626;
+}
+
+.level-alert {
+  color: #f97316;
+}
+
+.level-warning {
+  color: #fbbf24;
+}
+
+.level-info {
+  color: #3b82f6;
+}
+
+.level-success {
+  color: #10b981;
+}
+
+.log-message {
+  font-family: 'Ubuntu', sans-serif;
+  color: #e0e0e0;
+}
+
+.log-entry:has(.level-critical) {
+  border-left-color: #dc2626;
+}
+
+.log-entry:has(.level-alert) {
+  border-left-color: #f97316;
+}
+
+.log-entry:has(.level-warning) {
+  border-left-color: #fbbf24;
+}
+
+@media (max-width: 768px) {
+  .log-data-panel {
+    padding: 16px;
+    max-height: 400px;
+  }
+
+  .log-entry {
+    font-size: 12px;
+  }
+}
+
