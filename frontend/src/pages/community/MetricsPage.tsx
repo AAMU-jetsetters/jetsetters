@@ -1,60 +1,81 @@
+import { useState } from 'react';
 import RiskIndexCard from '../../components/community/RiskIndexCard';
 import ChemicalParameters from '../../components/community/ChemicalParameters';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
+import { useRiskIndex } from '../../hooks/useRiskIndex';
+import { useChemicals } from '../../hooks/useChemicals';
+import { useHistoricalData } from '../../hooks/useHistoricalData';
+import { mapRiskLevelToRiskIndexCard, mapStatusToFrontend, getChemicalIcon } from '../../utils/dataMapper';
 import './MetricsPage.css';
 
 function MetricsPage() {
-  const riskIndexTrend = [
-    { date: 'Nov 1', value: 55 },
-    { date: 'Nov 2', value: 62 },
-    { date: 'Nov 3', value: 58 },
-    { date: 'Nov 4', value: 68 },
-    { date: 'Nov 5', value: 72 },
-    { date: 'Nov 6', value: 65 },
-    { date: 'Nov 7', value: 68 },
-  ];
+  const [timeRange, setTimeRange] = useState<7 | 30 | 90>(7);
+  const { data: riskIndex, loading: riskLoading } = useRiskIndex();
+  const { data: chemicals, loading: chemicalsLoading } = useChemicals();
+  const { riskIndexTrend, chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
 
-  const chlorineTrend = [
-    { date: 'Nov 1', value: 0.9 },
-    { date: 'Nov 2', value: 0.85 },
-    { date: 'Nov 3', value: 0.88 },
-    { date: 'Nov 4', value: 0.82 },
-    { date: 'Nov 5', value: 0.8 },
-    { date: 'Nov 6', value: 0.78 },
-    { date: 'Nov 7', value: 0.8 },
-  ];
+  const chlorineTrend = chemicalTrends.chlorine || [];
+
+  const mappedChemicals = chemicals?.map((chem) => ({
+    id: chem.parameter,
+    name: chem.displayName,
+    value: chem.value.split(' ')[0],
+    unit: chem.value.split(' ').slice(1).join(' '),
+    status: mapStatusToFrontend(chem.status),
+    icon: getChemicalIcon(chem.parameter),
+  })) || [];
+
+  if (riskLoading || chemicalsLoading || historyLoading) {
+    return (
+      <div className="metrics-page">
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#a0a0a0' }}>
+          Loading metrics...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="metrics-page">
-      <div className="metrics-section">
-        <RiskIndexCard
-          percentage={68}
-          riskLevel="Moderate Risk"
-          description="Current risk assessment based on real-time sensor data and predictive models across your community."
-        />
-      </div>
+      {riskIndex && (
+        <div className="metrics-section">
+          <RiskIndexCard
+            percentage={Math.round(riskIndex.index)}
+            riskLevel={mapRiskLevelToRiskIndexCard(riskIndex.level)}
+            description={riskIndex.description}
+          />
+        </div>
+      )}
 
       <div className="metrics-section">
         <HistoricalTrends
           title="Risk Index Trend"
           data={riskIndexTrend}
-          timeRange="7days"
+          timeRange={`${timeRange}days` as '7days' | '30days' | '90days'}
           unit="%"
           variant="community"
+          onTimeRangeChange={(range) => {
+            const days = parseInt(range.replace('days', '')) as 7 | 30 | 90;
+            setTimeRange(days);
+          }}
         />
       </div>
 
       <div className="metrics-section">
-        <ChemicalParameters />
+        <ChemicalParameters parameters={mappedChemicals} />
       </div>
 
       <div className="metrics-section">
         <HistoricalTrends
           title="Chlorine Residual Trend"
           data={chlorineTrend}
-          timeRange="7days"
+          timeRange={`${timeRange}days` as '7days' | '30days' | '90days'}
           unit="mg/L"
           variant="community"
+          onTimeRangeChange={(range) => {
+            const days = parseInt(range.replace('days', '')) as 7 | 30 | 90;
+            setTimeRange(days);
+          }}
         />
       </div>
     </div>

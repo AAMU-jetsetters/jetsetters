@@ -9,7 +9,7 @@ import {
   AttackScenario,
 } from '../types/index.js';
 
-export class SyntheticDataService {
+export class WaterDataService {
   private currentState: TimeSeriesPoint;
   private activeAttack: AttackScenario | null = null;
   private attackStartTime: Date | null = null;
@@ -69,7 +69,57 @@ export class SyntheticDataService {
 
   constructor() {
     this.currentState = this.generateBaselineState();
+    this.prePopulateHistory();
     this.startDataGeneration();
+  }
+
+  private prePopulateHistory(): void {
+    const now = new Date();
+    const daysToGenerate = 30;
+    const pointsPerDay = 24;
+    const totalPoints = daysToGenerate * pointsPerDay;
+    
+    const baseTimestamp = new Date(now.getTime() - (daysToGenerate * 24 * 60 * 60 * 1000));
+    let tempState = this.generateBaselineState();
+    tempState.timestamp = baseTimestamp;
+    
+    for (let i = 0; i < totalPoints; i++) {
+      const hoursAgo = i;
+      const timestamp = new Date(baseTimestamp.getTime() + (hoursAgo * 60 * 60 * 1000));
+      
+      const newChemicals: ChemicalReading[] = tempState.chemicals.map((chem) => {
+        const range = this.NORMAL_RANGES[chem.parameter];
+        const currentValue = chem.value;
+        const drift = (range.optimal - currentValue) * 0.015;
+        const randomWalk = (Math.random() - 0.5) * 0.15 * (range.max - range.min);
+        const newValue = currentValue + drift + randomWalk;
+        
+        const clampedValue = Math.max(range.min * 0.85, Math.min(range.max * 1.15, newValue));
+        
+        return {
+          ...chem,
+          value: this.roundToPrecision(clampedValue, chem.parameter),
+          status: this.determineParameterStatus(chem.parameter, clampedValue),
+          timestamp: timestamp,
+        };
+      });
+
+      const riskIndex = this.calculateRiskIndex(newChemicals);
+      
+      tempState = {
+        timestamp: timestamp,
+        chemicals: newChemicals,
+        riskIndex,
+        anomalyContext: {
+          isActive: riskIndex > 60,
+          severity: this.mapRiskLevelToSeverity(this.determineRiskLevel(riskIndex)),
+        },
+      };
+      
+      this.dataHistory.push({ ...tempState });
+    }
+    
+    this.currentState = this.generateBaselineState();
   }
 
   private generateBaselineState(): TimeSeriesPoint {
@@ -109,47 +159,24 @@ export class SyntheticDataService {
     };
   }
 
-  private addNaturalVariation(
-    baseValue: number,
-    min: number,
-    max: number,
-    variationPercent: number = 0.05
-  ): number {
-    const variation = baseValue * variationPercent;
-    const randomVariation = (Math.random() - 0.5) * 2 * variation;
-    const newValue = baseValue + randomVariation;
-    return Math.max(min, Math.min(max, newValue));
-  }
-
   private roundToPrecision(value: number, parameter: ChemicalParameter): number {
     const precisions: Record<ChemicalParameter, number> = {
-      chlorine: 1,
-      pH: 1,
-      turbidity: 1,
-      temperature: 0,
+      chlorine: 2,
+      pH: 2,
+      turbidity: 2,
+      temperature: 1,
       lead: 3,
     };
-    
-    const precision = precisions[parameter];
+    const precision = precisions[parameter] || 2;
     return Math.round(value * Math.pow(10, precision)) / Math.pow(10, precision);
   }
 
-  private determineParameterStatus(
-    parameter: ChemicalParameter,
-    value: number
-  ): ParameterStatus {
+  private determineParameterStatus(parameter: ChemicalParameter, value: number): ParameterStatus {
     const range = this.NORMAL_RANGES[parameter];
-    const optimal = range.optimal;
-    const tolerance = (range.max - range.min) * 0.15;
-
-    if (value >= range.min && value <= range.max) {
-      const deviation = Math.abs(value - optimal);
-      if (deviation <= tolerance) {
-        return 'normal';
-      } else {
-        return 'warning';
-      }
-    }
+    const deviation = Math.abs(value - range.optimal) / (range.max - range.min);
+    
+    if (deviation < 0.15) return 'normal';
+    if (deviation < 0.35) return 'warning';
     return 'anomaly';
   }
 
@@ -159,20 +186,11 @@ export class SyntheticDataService {
 
     chemicals.forEach((chemical) => {
       const range = this.NORMAL_RANGES[chemical.parameter];
-      const optimal = range.optimal;
-      const rangeSize = range.max - range.min;
-      let deviation: number;
-      if (chemical.value < range.min) {
-        deviation = (range.min - chemical.value) / rangeSize;
-      } else if (chemical.value > range.max) {
-        deviation = (chemical.value - range.max) / rangeSize;
-      } else {
-        deviation = Math.abs(chemical.value - optimal) / rangeSize;
-      }
+      const deviation = Math.abs(chemical.value - range.optimal) / (range.max - range.min);
 
       const weights: Record<ChemicalParameter, number> = {
-        chlorine: 0.25,
         pH: 0.30,
+        chlorine: 0.25,
         turbidity: 0.20,
         temperature: 0.15,
         lead: 0.10,
@@ -230,138 +248,81 @@ export class SyntheticDataService {
     });
 
     const riskIndex = this.calculateRiskIndex(newChemicals);
-    const riskLevel = this.determineRiskLevel(riskIndex);
-
+    
     return {
       timestamp: now,
       chemicals: newChemicals,
       riskIndex,
       anomalyContext: {
-        isActive: riskLevel !== 'stable',
-        severity: this.mapRiskLevelToSeverity(riskLevel),
+        isActive: riskIndex > 60,
+        severity: this.mapRiskLevelToSeverity(this.determineRiskLevel(riskIndex)),
       },
     };
   }
 
-  private applyAttackEffects(
-    currentPoint: TimeSeriesPoint,
-    elapsedMinutes: number
-  ): TimeSeriesPoint {
-    if (!this.activeAttack) return currentPoint;
+  private applyAttackEffects(previousPoint: TimeSeriesPoint, elapsedMinutes: number): TimeSeriesPoint {
+    if (!this.activeAttack) return previousPoint;
 
-    const newChemicals: ChemicalReading[] = currentPoint.chemicals.map((chem) => {
-      const attackEffect = this.activeAttack!.effects.find(
-        (e) => e.parameter === chem.parameter
-      );
+    const newChemicals: ChemicalReading[] = previousPoint.chemicals.map((chem) => {
+      const effect = this.activeAttack!.effects.find((e) => e.parameter === chem.parameter);
+      if (!effect) return { ...chem, timestamp: new Date() };
 
-      if (!attackEffect) {
-        const range = this.NORMAL_RANGES[chem.parameter];
-        const drift = (range.optimal - chem.value) * 0.01;
-        const randomWalk = (Math.random() - 0.5) * 0.05 * (range.max - range.min);
-        const newValue = Math.max(range.min, Math.min(range.max, chem.value + drift + randomWalk));
-        return {
-          ...chem,
-          value: this.roundToPrecision(newValue, chem.parameter),
-          status: this.determineParameterStatus(chem.parameter, newValue),
-          timestamp: new Date(),
-        };
-      }
-
-      const progress = Math.min(1, elapsedMinutes / (this.activeAttack!.duration * 0.7));
-      const currentTarget = attackEffect.targetValue;
-      const currentValue = chem.value;
-      const change = (currentTarget - currentValue) * progress * attackEffect.progressionRate;
-      const newValue = currentValue + change;
+      const progress = Math.min(elapsedMinutes / this.activeAttack!.duration, 1);
+      const targetDiff = effect.targetValue - chem.value;
+      const newValue = chem.value + targetDiff * progress * effect.progressionRate;
+      const range = this.NORMAL_RANGES[chem.parameter];
+      const clampedValue = Math.max(range.min * 0.5, Math.min(range.max * 2, newValue));
 
       return {
         ...chem,
-        value: this.roundToPrecision(newValue, chem.parameter),
-        status: this.determineParameterStatus(chem.parameter, newValue),
+        value: this.roundToPrecision(clampedValue, chem.parameter),
+        status: this.determineParameterStatus(chem.parameter, clampedValue),
         timestamp: new Date(),
-        note: this.generateAttackNote(chem.parameter, newValue),
       };
     });
 
     const riskIndex = this.calculateRiskIndex(newChemicals);
-    const riskLevel = this.determineRiskLevel(riskIndex);
-
+    
     return {
       timestamp: new Date(),
       chemicals: newChemicals,
       riskIndex,
       anomalyContext: {
         isActive: true,
-        severity: this.mapRiskLevelToSeverity(riskLevel),
-        type: this.activeAttack!.type,
-        affectedParameters: this.activeAttack!.effects.map((e) => e.parameter),
-        startTime: this.attackStartTime!,
+        severity: this.mapRiskLevelToSeverity(this.determineRiskLevel(riskIndex)),
+        type: this.activeAttack.type,
+        affectedParameters: this.activeAttack.effects.map((e) => e.parameter),
+        startTime: this.attackStartTime || undefined,
       },
     };
   }
 
-  private beginRecovery(currentPoint: TimeSeriesPoint): TimeSeriesPoint {
-    const newChemicals: ChemicalReading[] = currentPoint.chemicals.map((chem) => {
+  private beginRecovery(previousPoint: TimeSeriesPoint): TimeSeriesPoint {
+    const newChemicals: ChemicalReading[] = previousPoint.chemicals.map((chem) => {
       const range = this.NORMAL_RANGES[chem.parameter];
-      const optimal = range.optimal;
-      const currentValue = chem.value;
-      const recoveryRate = 0.05;
-      const recovery = (optimal - currentValue) * recoveryRate;
-      const newValue = currentValue + recovery;
-      
+      const recoveryRate = 0.02;
+      const newValue = chem.value + (range.optimal - chem.value) * recoveryRate;
+      const clampedValue = Math.max(range.min, Math.min(range.max, newValue));
+
       return {
         ...chem,
-        value: this.roundToPrecision(
-          Math.max(range.min * 0.95, Math.min(range.max * 1.05, newValue)),
-          chem.parameter
-        ),
-        status: this.determineParameterStatus(chem.parameter, newValue),
+        value: this.roundToPrecision(clampedValue, chem.parameter),
+        status: this.determineParameterStatus(chem.parameter, clampedValue),
         timestamp: new Date(),
       };
     });
 
     const riskIndex = this.calculateRiskIndex(newChemicals);
-    const riskLevel = this.determineRiskLevel(riskIndex);
-
+    
     return {
       timestamp: new Date(),
       chemicals: newChemicals,
       riskIndex,
       anomalyContext: {
-        isActive: riskLevel !== 'stable',
-        severity: this.mapRiskLevelToSeverity(riskLevel),
+        isActive: riskIndex > 60,
+        severity: this.mapRiskLevelToSeverity(this.determineRiskLevel(riskIndex)),
       },
     };
-  }
-
-  private generateAttackNote(parameter: ChemicalParameter, value: number): string {
-    const range = this.NORMAL_RANGES[parameter];
-    const notes: Record<ChemicalParameter, (v: number, r: typeof range) => string> = {
-      chlorine: (v, r) => {
-        if (v > r.max) return 'Excessive Chlorine Dosing Detected';
-        if (v < r.min) return 'Insufficient Chlorine Residual';
-        return 'Chlorine levels within normal range';
-      },
-      pH: (v, r) => {
-        if (v > 8.5) return 'Potential Alkaline Dosing';
-        if (v < 7.0) return 'Acidic Conditions Detected';
-        return 'pH levels stable';
-      },
-      turbidity: (v, r) => {
-        if (v > r.max) return 'Filtration System Compromised';
-        return 'Physical Filtration Unaffected';
-      },
-      temperature: (v, r) => {
-        if (v > r.max) return 'Temperature Control Failure';
-        if (v < r.min) return 'Low Temperature Alert';
-        return 'Temperature within normal range';
-      },
-      lead: (v, r) => {
-        if (v > r.max) return 'Elevated Lead Concentration';
-        return 'Lead levels acceptable';
-      },
-    };
-
-    return notes[parameter](value, range);
   }
 
   private mapRiskLevelToSeverity(level: OverallRiskLevel): 'low' | 'medium' | 'high' | 'critical' {
@@ -443,5 +404,5 @@ export class SyntheticDataService {
   }
 }
 
-export const syntheticDataService = new SyntheticDataService();
+export const waterDataService = new WaterDataService();
 

@@ -5,12 +5,12 @@ import {
   HealthAdvisory,
   PublicStatusResponse,
 } from '../types/index.js';
-import { syntheticDataService } from './synthetic-data.service.js';
+import { waterDataService } from './water-data.service.js';
 
 export class StatusCalculatorService {
   public getPublicStatus(): PublicStatusResponse {
-    const currentState = syntheticDataService.getCurrentState();
-    const riskIndex = syntheticDataService.getWaterRiskIndex();
+    const currentState = waterDataService.getCurrentState();
+    const riskIndex = waterDataService.getWaterRiskIndex();
 
     return {
       overallRisk: riskIndex,

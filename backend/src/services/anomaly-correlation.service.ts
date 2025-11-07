@@ -1,5 +1,5 @@
 import { AnomalyContext } from '../types/index.js';
-import { syntheticDataService } from './synthetic-data.service.js';
+import { waterDataService } from './water-data.service.js';
 
 export class AnomalyCorrelationService {
   public async processAnomaly(mlAnomaly: AnomalyContext): Promise<void> {
@@ -10,7 +10,7 @@ export class AnomalyCorrelationService {
     const scenarioId = this.mapAnomalyToScenario(mlAnomaly);
     
     if (scenarioId) {
-      syntheticDataService.triggerAttack(scenarioId);
+      waterDataService.triggerAttack(scenarioId);
     }
   }
 

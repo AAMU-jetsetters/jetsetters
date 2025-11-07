@@ -5,7 +5,7 @@ import {
   AnomalyContext,
 } from '../types/index.js';
 
-export interface ISyntheticDataService {
+export interface IWaterDataService {
   startDataGeneration(intervalMs: number): void;
   stopDataGeneration(): void;
   getCurrentState(): TimeSeriesPoint;
