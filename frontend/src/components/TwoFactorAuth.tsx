@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import { mockAuthService } from '../services/mockAuth';
+import { authService } from '../services/authService';
 import './TwoFactorAuth.css';
 
 interface TwoFactorAuthProps {
@@ -68,10 +68,9 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
       return;
     }
 
-    // Verify code based on flow type
     const result = flowType === 'signup' 
-      ? mockAuthService.verifySignupCode(email, fullCode)
-      : mockAuthService.verifyLoginCode(email, fullCode);
+      ? authService.verifySignupCode(email, fullCode)
+      : authService.verifyLoginCode(email, fullCode);
 
     if (!result.success) {
       setError(result.message);
@@ -96,7 +95,7 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
     setSuccess('');
     setCode(Array(6).fill(''));
     
-    const result = mockAuthService.resendCode(email);
+    const result = authService.resendCode(email);
     
     if (result.success) {
       setSuccess('New code sent! Check console for code.');

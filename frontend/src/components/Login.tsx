@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { mockAuthService } from '../services/mockAuth';
+import { authService } from '../services/authService';
 import './Login.css';
 
 interface LoginProps {
@@ -16,7 +16,7 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
     e.preventDefault();
     setError('');
 
-    const result = mockAuthService.login(emailOrUsername, password);
+    const result = authService.login(emailOrUsername, password);
 
     if (!result.success) {
       setError(result.message);

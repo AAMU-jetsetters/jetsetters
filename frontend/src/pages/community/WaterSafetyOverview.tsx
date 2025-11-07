@@ -18,7 +18,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'metrics' | 'profile'>('home');
   const [showReportForm, setShowReportForm] = useState(false);
 
-  const mockTrendData = [
+  const trendData = [
     { date: 'Nov 1', value: 7.6 },
     { date: 'Nov 2', value: 7.8 },
     { date: 'Nov 3', value: 7.7 },
@@ -95,7 +95,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
             <div className="content-section">
               <HistoricalTrends
                 title="Water Quality Trend (pH Level)"
-                data={mockTrendData}
+                data={trendData}
                 timeRange="7days"
                 unit="pH"
                 variant="community"
