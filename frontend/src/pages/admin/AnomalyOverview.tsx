@@ -5,6 +5,7 @@ import DataCard from '../../components/admin/DataCard';
 import AlertList from '../../components/admin/AlertList';
 import NetworkHealth from '../../components/admin/NetworkHealth';
 import IncidentList from '../../components/admin/IncidentList';
+import HistoricalTrends from '../../components/common/HistoricalTrends';
 import DiagnosticsForensics from './DiagnosticsForensics';
 import AIAnalystChat from './AIAnalystChat';
 import './AnomalyOverview.css';
@@ -16,7 +17,7 @@ interface AnomalyOverviewProps {
 function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
   const [activeNav, setActiveNav] = useState('anomaly-overview');
 
-  // Mock data for demonstration
+  // Mock data to be replaced with model feed
   const mockAlerts = [
     { id: '1', type: 'Pump Failure', status: 'Active' as const, time: '2023-10-26 14:30 UTC', severity: 'Critical' as const },
     { id: '2', type: 'Pressure Drop', status: 'Active' as const, time: '2023-10-26 14:20 UTC', severity: 'Critical' as const },
@@ -24,6 +25,16 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
     { id: '4', type: 'Network Latency', status: 'Active' as const, time: '2023-10-26 14:00 UTC', severity: 'Medium' as const },
     { id: '5', type: 'Filter Clog', status: 'Resolved' as const, time: '2023-10-26 13:45 UTC', severity: 'Low' as const },
     { id: '6', type: 'Power Fluctuation', status: 'Acknowledged' as const, time: '2023-10-26 13:30 UTC', severity: 'Medium' as const },
+  ];
+
+  const mockAnomalyTrend = [
+    { date: 'Nov 1', value: 0.65 },
+    { date: 'Nov 2', value: 0.72 },
+    { date: 'Nov 3', value: 0.68 },
+    { date: 'Nov 4', value: 0.85 },
+    { date: 'Nov 5', value: 0.88 },
+    { date: 'Nov 6', value: 0.82 },
+    { date: 'Nov 7', value: 0.88 },
   ];
 
   const mockIncidents = [
@@ -111,6 +122,17 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
                     failedConnections={15}
                   />
                 </div>
+              </section>
+
+              {/* Historical Trends Section */}
+              <section className="trends-section">
+                <HistoricalTrends
+                  title="Anomaly Score Trend"
+                  data={mockAnomalyTrend}
+                  timeRange="7days"
+                  unit="Score"
+                  variant="admin"
+                />
               </section>
 
               {/* Recent Incidents Section */}

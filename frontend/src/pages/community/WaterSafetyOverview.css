@@ -1,0 +1,143 @@
+.water-safety-page {
+  min-height: 100vh;
+  background-color: #000000;
+  font-family: 'Ubuntu', sans-serif;
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+
+.mobile-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  background-color: #000000;
+}
+
+.header-icon {
+  color: #ffffff;
+}
+
+.header-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-section {
+  padding: 0 24px 24px;
+}
+
+.placeholder-content {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.placeholder-content h2 {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+}
+
+.placeholder-content p {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+.profile-content {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  text-align: center;
+}
+
+.profile-info {
+  text-align: center;
+}
+
+.profile-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+.logout-button {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 12px;
+}
+
+.logout-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+  .water-safety-page {
+    padding-bottom: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .mobile-header {
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .header-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .content-section {
+    padding: 0 32px 32px;
+  }
+
+  .page-content {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1024px) {
+  .content-section {
+    padding: 0 40px 40px;
+  }
+}
+
