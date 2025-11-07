@@ -1,0 +1,87 @@
+.network-health-container {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.network-health-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.network-health-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.network-status {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 12px;
+}
+
+.status-warning {
+  color: #ffffff;
+  background-color: #fbbf24;
+}
+
+.status-healthy {
+  color: #ffffff;
+  background-color: #10b981;
+}
+
+.status-critical {
+  color: #ffffff;
+  background-color: #ef4444;
+}
+
+.network-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid #2a2a2a;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.network-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #a0a0a0;
+}
+
+.metric-value {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.network-footer {
+  display: flex;
+  align-items: center;
+}
+
+.footer-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #a0a0a0;
+}
+

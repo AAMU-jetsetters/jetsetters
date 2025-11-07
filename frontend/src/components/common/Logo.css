@@ -1,0 +1,66 @@
+.logo-component {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-circle {
+  background: linear-gradient(135deg, #14b8a6 0%, #0f9b8e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+}
+
+.logo-icon {
+  display: block;
+}
+
+.logo-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Size variants */
+.logo-component.small .logo-circle {
+  width: 32px;
+  height: 32px;
+}
+
+.logo-component.small .logo-icon {
+  font-size: 16px;
+}
+
+.logo-component.small .logo-text {
+  font-size: 16px;
+}
+
+.logo-component.medium .logo-circle {
+  width: 40px;
+  height: 40px;
+}
+
+.logo-component.medium .logo-icon {
+  font-size: 20px;
+}
+
+.logo-component.medium .logo-text {
+  font-size: 20px;
+}
+
+.logo-component.large .logo-circle {
+  width: 50px;
+  height: 50px;
+}
+
+.logo-component.large .logo-icon {
+  font-size: 25px;
+}
+
+.logo-component.large .logo-text {
+  font-size: 24px;
+}
+

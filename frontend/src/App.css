@@ -1,42 +1,101 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.app {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Success screen styles */
+.success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #000000;
+  padding: 20px;
+}
+
+.success-card {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 48px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.success-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.success-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.success-message {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  color: #a0a0a0;
+  margin: 0 0 32px 0;
+}
+
+.success-button {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 14px 32px;
+  background-color: #14b8a6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.success-button:hover {
+  background-color: #0f9b8e;
+}
+
+.success-button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .success-card {
+    padding: 32px 24px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .success-icon {
+    font-size: 64px;
+  }
+
+  .success-title {
+    font-size: 28px;
+  }
+
+  .success-message {
+    font-size: 14px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@media (max-width: 480px) {
+  .success-card {
+    padding: 24px 20px;
   }
-}
 
-.card {
-  padding: 2em;
-}
+  .success-icon {
+    font-size: 56px;
+  }
 
-.read-the-docs {
-  color: #888;
+  .success-title {
+    font-size: 24px;
+  }
+
+  .success-message {
+    font-size: 13px;
+  }
 }

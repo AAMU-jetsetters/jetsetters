@@ -1,0 +1,35 @@
+.schematic-widget {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.schematic-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.schematic-content {
+  flex: 1;
+  background-color: #0a0a0a;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+@media (max-width: 768px) {
+  .schematic-content {
+    min-height: 250px;
+  }
+}
+

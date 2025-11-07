@@ -1,0 +1,154 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000000;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Data Cards Section */
+.data-cards-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Alerts and Network Health Section */
+.alerts-network-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.alerts-column,
+.network-column {
+  min-width: 0;
+}
+
+/* Recent Incidents Section */
+.incidents-section {
+  margin-bottom: 24px;
+}
+
+/* Placeholder Content */
+.placeholder-content {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.placeholder-content h2 {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.placeholder-content p {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  color: #a0a0a0;
+  margin: 0 0 32px 0;
+}
+
+.content-placeholder {
+  padding: 60px 20px;
+  background-color: #0a0a0a;
+  border: 2px dashed #2a2a2a;
+  border-radius: 8px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  color: #666666;
+}
+
+/* Footer */
+.admin-footer {
+  padding: 20px 24px;
+  text-align: center;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  color: #666666;
+  background-color: #0a0a0a;
+  border-top: 1px solid #2a2a2a;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .data-cards-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .alerts-network-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-content {
+    padding: 16px;
+  }
+
+  .data-cards-section {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .alerts-network-section,
+  .incidents-section {
+    margin-bottom: 16px;
+  }
+
+  .placeholder-content {
+    padding: 24px;
+  }
+
+  .placeholder-content h2 {
+    font-size: 22px;
+  }
+
+  .placeholder-content p {
+    font-size: 14px;
+  }
+
+  .content-placeholder {
+    padding: 40px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 12px;
+  }
+
+  .data-cards-section {
+    gap: 12px;
+  }
+
+  .admin-footer {
+    padding: 16px;
+    font-size: 12px;
+  }
+}
+
