@@ -1,0 +1,169 @@
+.chemical-parameters {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.parameters-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.parameters-icon {
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parameters-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.parameters-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.parameters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.parameter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #0a0a0a;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.parameter-item:hover {
+  background-color: #141414;
+}
+
+.parameter-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.parameter-icon {
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(167, 139, 250, 0.1);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.parameter-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.parameter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parameter-name {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.parameter-value {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+.parameter-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.status-normal {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.status-warning {
+  background-color: #fbbf24;
+  color: #000000;
+}
+
+.status-anomaly {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .chemical-parameters {
+    padding: 24px;
+  }
+
+  .parameters-title {
+    font-size: 20px;
+  }
+
+  .parameter-item {
+    padding: 18px;
+  }
+
+  .parameter-name {
+    font-size: 16px;
+  }
+
+  .parameter-value {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .parameters-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+

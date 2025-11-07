@@ -39,6 +39,11 @@
   min-width: 0;
 }
 
+/* Historical Trends Section */
+.trends-section {
+  margin-bottom: 24px;
+}
+
 /* Recent Incidents Section */
 .incidents-section {
   margin-bottom: 24px;

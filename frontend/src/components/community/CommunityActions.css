@@ -1,0 +1,93 @@
+.community-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actions-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background-color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.action-btn:hover {
+  background-color: #2a2a2a;
+}
+
+.action-btn:active {
+  background-color: #1a1a1a;
+}
+
+.action-btn svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.action-btn span {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.faq-link {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #a78bfa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.faq-link:hover {
+  color: #8b5cf6;
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+  .actions-title {
+    font-size: 20px;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .faq-link {
+    text-align: center;
+  }
+}
+

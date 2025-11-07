@@ -1,0 +1,160 @@
+.historical-trends {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.trends-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 8px;
+  background-color: #0a0a0a;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.range-btn {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.range-btn:hover {
+  color: #ffffff;
+  background-color: #1a1a1a;
+}
+
+.range-btn.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.historical-trends.admin .range-btn.active {
+  background-color: #a78bfa;
+}
+
+.historical-trends.community .range-btn.active {
+  background-color: #3b82f6;
+}
+
+.chart-container {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0;
+  min-width: 45px;
+}
+
+.axis-value {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 12px;
+  color: #a0a0a0;
+  text-align: right;
+}
+
+.chart-area {
+  flex: 1;
+  background-color: #0a0a0a;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 200px;
+}
+
+.unit-label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666666;
+  background-color: #0a0a0a;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.x-axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 57px 0 57px;
+}
+
+.axis-label {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 11px;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .trends-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .time-range-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .range-btn {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .chart-area {
+    min-height: 180px;
+  }
+
+  .x-axis {
+    padding: 0 50px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .historical-trends {
+    padding: 16px;
+  }
+
+  .trends-title {
+    font-size: 16px;
+  }
+
+  .chart-area {
+    min-height: 160px;
+  }
+}
+
