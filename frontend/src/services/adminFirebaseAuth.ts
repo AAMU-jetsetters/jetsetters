@@ -31,11 +31,9 @@ export interface MFAEnrollResult {
   verificationId?: string;
 }
 
-// reCAPTCHA verifier instance
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export const adminFirebaseAuth = {
-  // Initialize reCAPTCHA (call this before MFA operations)
   initRecaptcha: (containerId: string, invisible: boolean = false): RecaptchaVerifier => {
     if (recaptchaVerifier) {
       recaptchaVerifier.clear();
@@ -71,9 +69,10 @@ export const adminFirebaseAuth = {
       );
       console.log('Admin user created:', userCredential.user.email);
       return { success: true, user: userCredential.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Admin signup error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Admin signup failed';
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -97,11 +96,10 @@ export const adminFirebaseAuth = {
       
       console.log('Admin user logged in:', userCredential.user.email);
       return { success: true, user: userCredential.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Admin login error:', error);
       
-      // Check if MFA is required
-      if (error.code === 'auth/multi-factor-auth-required') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'auth/multi-factor-auth-required') {
         const resolver = getMultiFactorResolver(auth, error as MultiFactorError);
         console.log('MFA required, second factor needed');
         return { 
@@ -112,11 +110,11 @@ export const adminFirebaseAuth = {
         };
       }
       
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Admin login failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Enroll phone number as second factor
   enrollMFA: async (
     user: User,
     phoneNumber: string,
@@ -145,16 +143,16 @@ export const adminFirebaseAuth = {
 
       console.log('MFA enrollment code sent to:', phoneNumber);
       return { success: true, verificationId };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('MFA enrollment error:', error);
       if (recaptchaVerifier) {
         recaptchaVerifier.clear();
       }
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'MFA enrollment failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Complete MFA enrollment with verification code
   completeMFAEnrollment: async (
     user: User,
     verificationId: string,
@@ -169,13 +167,13 @@ export const adminFirebaseAuth = {
       
       console.log('MFA enrollment completed successfully');
       return { success: true, user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('MFA enrollment completion error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'MFA enrollment completion failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Send MFA verification code during sign-in
   sendMFAVerification: async (
     resolver: MultiFactorResolver,
     recaptchaContainerId: string,
@@ -200,16 +198,16 @@ export const adminFirebaseAuth = {
 
       console.log('MFA verification code sent');
       return { success: true, verificationId };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('MFA verification send error:', error);
       if (recaptchaVerifier) {
         recaptchaVerifier.clear();
       }
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'MFA verification send failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Complete MFA sign-in with verification code
   completeMFASignIn: async (
     resolver: MultiFactorResolver,
     verificationId: string,
@@ -223,45 +221,41 @@ export const adminFirebaseAuth = {
       
       console.log('MFA sign-in completed successfully');
       return { success: true, user: userCredential.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('MFA sign-in completion error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'MFA sign-in completion failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Sign out
   logout: async (): Promise<AuthResult> => {
     try {
       await signOut(auth);
       console.log('Admin user logged out');
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Logout error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Logout failed';
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Get current user
   getCurrentUser: (): User | null => {
     return auth.currentUser;
   },
 
-  // Check if user is authenticated
   isAuthenticated: (): boolean => {
     return auth.currentUser !== null;
   },
 
-  // Check if user has MFA enrolled
   hasMFAEnrolled: (user: User): boolean => {
     return multiFactor(user).enrolledFactors.length > 0;
   },
 
-  // Get enrolled MFA factors
   getEnrolledFactors: (user: User) => {
     return multiFactor(user).enrolledFactors;
   },
 
-  // Clear reCAPTCHA
   clearRecaptcha: () => {
     if (recaptchaVerifier) {
       recaptchaVerifier.clear();

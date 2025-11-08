@@ -216,13 +216,70 @@
 
 @media (min-width: 768px) {
   .notifications-page {
-    padding: 32px;
+    padding: 32px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .notifications-header {
+    margin-bottom: 24px;
+  }
+
+  .notifications-title {
+    font-size: 32px;
+  }
+
+  .notifications-list {
+    gap: 16px;
+  }
+
+  .notification-card {
+    padding: 24px;
+  }
+
+  .notification-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .notification-icon-wrapper svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .notification-card-title {
+    font-size: 18px;
+  }
+
+  .notification-message {
+    font-size: 15px;
   }
 }
 
 @media (min-width: 1024px) {
   .notifications-page {
-    padding: 40px;
+    padding: 40px 60px;
+    max-width: 1200px;
+  }
+
+  .notifications-header {
+    margin-bottom: 28px;
+  }
+
+  .notifications-title {
+    font-size: 36px;
+  }
+
+  .mark-all-read-btn {
+    font-size: 15px;
+    padding: 12px 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .notifications-page {
+    padding: 48px 80px;
+    max-width: 1400px;
   }
 }
 

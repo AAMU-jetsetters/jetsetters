@@ -103,12 +103,13 @@ function AIAnalystChat() {
               }
             }
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Streaming error:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
           setMessages((prev) => 
             prev.map((msg) =>
               msg.id === streamingMessageId
-                ? { ...msg, content: `Error: ${error.message || 'Failed to get response'}` }
+                ? { ...msg, content: `Error: ${errorMessage}` }
                 : msg
             )
           );

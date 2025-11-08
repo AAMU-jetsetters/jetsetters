@@ -29,9 +29,10 @@ export const firebaseAuthService = {
       );
       console.log('User created:', userCredential.user.email);
       return { success: true, user: userCredential.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Signup failed';
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -47,9 +48,10 @@ export const firebaseAuthService = {
       );
       console.log('User logged in:', userCredential.user.email);
       return { success: true, user: userCredential.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -58,9 +60,10 @@ export const firebaseAuthService = {
       const result: UserCredential = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful:', result.user.email);
       return { success: true, user: result.user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google sign-in error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed';
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -69,9 +72,10 @@ export const firebaseAuthService = {
       await signOut(auth);
       console.log('User logged out');
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Logout error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Logout failed';
+      return { success: false, error: errorMessage };
     }
   },
 

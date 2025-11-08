@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { MultiFactorResolver } from 'firebase/auth'
+import LandingPage from './components/LandingPage'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import TwoFactorAuth from './components/TwoFactorAuth'
@@ -11,11 +12,11 @@ import { auth } from './config/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import './App.css'
 
-type Screen = 'login' | 'signup' | 'twofa-signup' | 'twofa-login' | 'success' | 'admin-dashboard' | 'community-dashboard' | 'community-login' | 'community-signup';
+type Screen = 'landing' | 'login' | 'signup' | 'twofa-signup' | 'twofa-login' | 'success' | 'admin-dashboard' | 'community-dashboard' | 'community-login' | 'community-signup';
 type FlowType = 'signup' | 'login';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('community-login')
+  const [currentScreen, setCurrentScreen] = useState<Screen>('landing')
   const [currentEmail, setCurrentEmail] = useState<string>('')
   const [flowType, setFlowType] = useState<FlowType>('login')
   const [verificationId, setVerificationId] = useState<string>('')
@@ -36,7 +37,6 @@ function App() {
           setCurrentScreen('community-dashboard')
         }
       } else {
-        // User is not authenticated
         if (currentScreen === 'community-dashboard') {
           setCurrentScreen('community-login')
         }
@@ -60,10 +60,8 @@ function App() {
     setMfaResolver(resolver)
     
     if (resolver) {
-      // MFA required, send SMS code
       console.log('Sending MFA verification code...')
       
-      // Send SMS code automatically
       const result = await import('./services/adminFirebaseAuth').then(module => 
         module.adminFirebaseAuth.sendMFAVerification(resolver, 'recaptcha-container-mfa-login', 0)
       );
@@ -76,7 +74,6 @@ function App() {
         alert('Failed to send verification code. Please try again.')
       }
     } else {
-      // No MFA enrolled, go directly to dashboard
       setCurrentScreen('admin-dashboard')
     }
   }
@@ -95,7 +92,6 @@ function App() {
     }
   }
 
-  // Navigation handlers
   const handleNavigateToLogin = () => {
     setCurrentScreen('login')
     setCurrentEmail('')
@@ -107,12 +103,14 @@ function App() {
   }
 
   const handleLogout = () => {
-    setCurrentScreen('login')
+    setCurrentScreen('landing')
     setCurrentEmail('')
+    setVerificationId('')
+    setMfaResolver(undefined)
+    setUserId('')
     console.log('User logged out')
   }
 
-  // Community auth handlers
   const handleCommunityLoginSuccess = () => {
     console.log('Community user logged in successfully')
     setCurrentScreen('community-dashboard')
@@ -134,8 +132,16 @@ function App() {
   }
 
   const handleCommunityLogout = () => {
-    setCurrentScreen('community-login')
+    setCurrentScreen('landing')
     console.log('Community user logged out')
+  }
+
+  const handleSelectCommunity = () => {
+    setCurrentScreen('community-login')
+  }
+
+  const handleSelectCompany = () => {
+    setCurrentScreen('login')
   }
 
   const renderSuccessScreen = () => (
@@ -161,8 +167,14 @@ function App() {
 
   return (
     <div className="app">
-      {/* Hidden reCAPTCHA container for MFA login flow */}
       <div id="recaptcha-container-mfa-login" style={{ display: 'none' }}></div>
+
+      {currentScreen === 'landing' && (
+        <LandingPage
+          onSelectCommunity={handleSelectCommunity}
+          onSelectCompany={handleSelectCompany}
+        />
+      )}
       
       {currentScreen === 'login' && (
         <Login 

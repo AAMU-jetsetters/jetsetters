@@ -235,13 +235,113 @@
 
 @media (min-width: 768px) {
   .profile-page {
-    padding: 0 32px 32px;
+    padding: 0 40px 32px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .profile-title {
+    font-size: 32px;
+    margin-bottom: 28px;
+  }
+
+  .profile-info-card {
+    padding: 28px;
+  }
+
+  .avatar-image,
+  .avatar-placeholder {
+    width: 96px;
+    height: 96px;
+  }
+
+  .avatar-placeholder {
+    font-size: 42px;
+  }
+
+  .profile-name {
+    font-size: 22px;
+  }
+
+  .profile-email {
+    font-size: 15px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .section-description {
+    font-size: 15px;
+  }
+
+  .notification-settings {
+    padding: 28px;
+  }
+
+  .notification-category {
+    margin-bottom: 36px;
+  }
+
+  .category-title {
+    font-size: 17px;
+    margin-bottom: 18px;
+  }
+
+  .notification-item {
+    padding: 18px 0;
+  }
+
+  .notification-label {
+    font-size: 17px;
+  }
+
+  .notification-desc {
+    font-size: 14px;
+  }
+
+  .save-button,
+  .logout-button {
+    font-size: 17px;
+    padding: 18px 28px;
   }
 }
 
 @media (min-width: 1024px) {
   .profile-page {
-    padding: 0 40px 40px;
+    padding: 0 60px 40px;
+    max-width: 1200px;
+  }
+
+  .profile-title {
+    font-size: 36px;
+    margin-bottom: 32px;
+  }
+
+  .notification-settings {
+    padding: 32px;
+  }
+
+  .notification-category {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 32px;
+    margin-bottom: 0;
+  }
+
+  .notification-category:first-child {
+    margin-bottom: 36px;
+  }
+
+  .category-title {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .profile-page {
+    padding: 0 80px 48px;
+    max-width: 1400px;
   }
 }
 

@@ -1,0 +1,263 @@
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.landing-container {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.landing-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.landing-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary-dark);
+  margin: 0;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary-dark);
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.login-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.option-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 32px;
+  background: rgba(26, 26, 46, 0.7);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
+  text-align: center;
+  overflow: hidden;
+}
+
+.option-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.1), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.option-card:hover::before {
+  opacity: 1;
+}
+
+.option-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 16px 48px rgba(0, 212, 255, 0.2),
+    0 0 80px rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.5);
+}
+
+.community-card:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 
+    0 16px 48px rgba(0, 212, 255, 0.25),
+    0 0 80px rgba(0, 212, 255, 0.2);
+}
+
+.company-card:hover {
+  border-color: rgba(157, 78, 221, 0.6);
+  box-shadow: 
+    0 16px 48px rgba(157, 78, 221, 0.25),
+    0 0 80px rgba(157, 78, 221, 0.2);
+}
+
+.card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+
+.community-icon {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(20, 184, 166, 0.15));
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  color: var(--accent-cyan);
+}
+
+.company-icon {
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.2), rgba(138, 43, 226, 0.15));
+  border: 2px solid rgba(157, 78, 221, 0.3);
+  color: var(--accent-purple);
+}
+
+.option-card:hover .card-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.community-card:hover .community-icon {
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+}
+
+.company-card:hover .company-icon {
+  box-shadow: 0 0 30px rgba(157, 78, 221, 0.4);
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary-dark);
+  margin: 0;
+}
+
+.card-description {
+  font-size: 15px;
+  color: var(--text-secondary-dark);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.card-arrow {
+  font-size: 28px;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  transition: transform 0.4s ease;
+}
+
+.option-card:hover .card-arrow {
+  transform: translateX(8px);
+}
+
+.company-card .card-arrow {
+  color: var(--accent-purple);
+}
+
+.landing-footer {
+  text-align: center;
+  padding-top: 40px;
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.landing-footer p {
+  font-size: 14px;
+  color: var(--text-secondary-dark);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-title {
+    font-size: 48px;
+  }
+
+  .landing-subtitle {
+    font-size: 20px;
+  }
+
+  .login-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+
+  .option-card {
+    padding: 48px 40px;
+  }
+
+  .card-title {
+    font-size: 26px;
+  }
+
+  .card-description {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-title {
+    font-size: 56px;
+  }
+
+  .landing-subtitle {
+    font-size: 22px;
+  }
+
+  .login-options {
+    gap: 40px;
+  }
+
+  .option-card {
+    padding: 56px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-title {
+    font-size: 28px;
+  }
+
+  .landing-subtitle {
+    font-size: 16px;
+  }
+
+  .option-card {
+    padding: 32px 24px;
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .card-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-title {
+    font-size: 20px;
+  }
+
+  .card-description {
+    font-size: 14px;
+  }
+}
+

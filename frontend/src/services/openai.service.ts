@@ -116,11 +116,12 @@ class OpenAIService {
           totalTokens: data.usage?.total_tokens || 0,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('OpenAI API error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get response from AI';
       return {
         success: false,
-        error: error.message || 'Failed to get response from AI',
+        error: errorMessage,
       };
     }
   }
@@ -207,10 +208,11 @@ class OpenAIService {
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('OpenAI streaming error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get response from AI';
       yield {
-        content: `Error: ${error.message || 'Failed to get response from AI'}`,
+        content: `Error: ${errorMessage}`,
         done: true,
       };
     }

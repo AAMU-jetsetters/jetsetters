@@ -16,11 +16,9 @@ interface TwoFactorAuthProps {
 }
 
 function TwoFactorAuth({ 
-  email: _email, 
   flowType, 
   verificationId: initialVerificationId, 
   resolver, 
-  userId: _userId,
   onVerifySuccess, 
   onResendCode 
 }: TwoFactorAuthProps) {

@@ -39,6 +39,7 @@ export class OperatorMLService {
     const anomalyScore = (modelOutput.anomaly_score as number) || 0;
     const anomalyType = (modelOutput.anomaly_type as string) || 'unknown';
     const severity = this.mapScoreToSeverity(anomalyScore);
+    const emptyPredictions: Record<string, unknown> = {};
 
     return {
       anomalyScore,
@@ -48,7 +49,7 @@ export class OperatorMLService {
         type: this.mapTypeToAnomalyType(anomalyType),
         startTime: new Date(),
       },
-      predictions: modelOutput.predictions || {},
+      predictions: (modelOutput.predictions as Record<string, unknown>) || emptyPredictions,
     };
   }
 

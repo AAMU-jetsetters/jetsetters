@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import RiskIndexCard from '../../components/community/RiskIndexCard';
 import ChemicalParameters from '../../components/community/ChemicalParameters';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
@@ -16,7 +16,7 @@ function MetricsPage() {
   const { data: chemicals, loading: chemicalsLoading } = useChemicals();
   const { riskIndexTrend, chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
 
-  const chlorineTrend = chemicalTrends.chlorine || [];
+  const chlorineTrend = useMemo(() => chemicalTrends.chlorine || [], [chemicalTrends.chlorine]);
 
   const mappedChemicals = chemicals?.map((chem) => ({
     id: chem.parameter,
