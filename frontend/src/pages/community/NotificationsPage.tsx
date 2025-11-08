@@ -1,108 +1,99 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './NotificationsPage.css';
-
-interface Notification {
-  id: string;
-  type: 'water-quality' | 'system-update' | 'maintenance';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
+import { notificationsApi, type Notification } from '../../services/notificationsApi';
 
 interface NotificationsPageProps {
   onMarkAllRead?: () => void;
 }
 
 function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'water-quality',
-      title: 'Water Quality Update',
-      message: 'pH levels have been stabilized. Water quality is now normal.',
-      time: '2 hours ago',
-      read: false,
-    },
-    {
-      id: '2',
-      type: 'system-update',
-      title: 'System Maintenance Complete',
-      message: 'Scheduled maintenance has been completed successfully.',
-      time: '5 hours ago',
-      read: false,
-    },
-    {
-      id: '3',
-      type: 'water-quality',
-      title: 'Water Quality Alert',
-      message: 'Slight increase in chlorine levels detected. Monitoring closely.',
-      time: '1 day ago',
-      read: true,
-    },
-    {
-      id: '4',
-      type: 'maintenance',
-      title: 'Scheduled Maintenance Notice',
-      message: 'Water system maintenance scheduled for tomorrow, 2:00 AM - 4:00 AM.',
-      time: '2 days ago',
-      read: true,
-    },
-    {
-      id: '5',
-      type: 'system-update',
-      title: 'System Update',
-      message: 'New water quality monitoring features have been added to your dashboard.',
-      time: '3 days ago',
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
-    );
-  };
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notif) => ({ ...notif, read: true }))
-    );
-    if (onMarkAllRead) {
-      onMarkAllRead();
+  const fetchNotifications = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await notificationsApi.getAllNotifications();
+      setNotifications(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load notifications');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
+      );
+    } catch (err) {
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, read: true }))
+      );
+      if (onMarkAllRead) {
+        onMarkAllRead();
+      }
+    } catch (err) {
+    }
+  };
+
+  const handleDeleteNotification = async (id: number) => {
+    try {
+      await notificationsApi.deleteNotification(id);
+      setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    } catch (err) {
+    }
+  };
+
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+      return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+    }
+
+    return date.toLocaleDateString();
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'water-quality':
-        return (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-          </svg>
-        );
-      case 'system-update':
-        return (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-        );
-      case 'maintenance':
-        return (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-          </svg>
-        );
-      default:
-        return null;
-    }
+  const getNotificationIcon = () => {
+    return (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+      </svg>
+    );
   };
 
   return (
@@ -123,7 +114,19 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
       )}
 
       <div className="notifications-list">
-        {notifications.length === 0 ? (
+        {loading ? (
+          <div className="no-notifications">
+            <p>Loading notifications...</p>
+          </div>
+        ) : error ? (
+          <div className="no-notifications">
+            <p>Error loading notifications</p>
+            <span>{error}</span>
+            <button onClick={fetchNotifications} style={{ marginTop: '10px', padding: '8px 16px' }}>
+              Retry
+            </button>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="no-notifications">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -141,14 +144,14 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
             >
               {!notification.read && <div className="unread-indicator"></div>}
               
-              <div className={`notification-icon-wrapper ${notification.type}`}>
-                {getNotificationIcon(notification.type)}
+              <div className={`notification-icon-wrapper water-quality`}>
+                {getNotificationIcon()}
               </div>
 
               <div className="notification-details">
                 <h3 className="notification-card-title">{notification.title}</h3>
                 <p className="notification-message">{notification.message}</p>
-                <span className="notification-timestamp">{notification.time}</span>
+                <span className="notification-timestamp">{formatTimeAgo(notification.createdAt)}</span>
               </div>
 
               <button
