@@ -435,14 +435,15 @@ export class WaterDataService {
         unit: 'mg/L',
         timestamp: now,
       },
-    ].map((chem) => {
-      const range = this.NORMAL_RANGES[chem.parameter];
-      const roundedValue = this.roundToPrecision(chem.value, chem.parameter);
+    ].map((chem): ChemicalReading => {
+      const param = chem.parameter as ChemicalParameter;
+      const range = this.NORMAL_RANGES[param];
+      const roundedValue = this.roundToPrecision(chem.value, param);
       return {
-        parameter: chem.parameter,
+        parameter: param,
         value: roundedValue,
         unit: range.unit,
-        status: this.determineParameterStatus(chem.parameter, roundedValue),
+        status: this.determineParameterStatus(param, roundedValue),
         timestamp: now,
       };
     });

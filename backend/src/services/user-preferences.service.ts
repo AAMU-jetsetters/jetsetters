@@ -115,7 +115,7 @@ export class UserPreferencesService {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
-    const result = insert.run(
+    insert.run(
       userId,
       email,
       preferences.waterQualityAlerts !== undefined ? (preferences.waterQualityAlerts ? 1 : 0) : 1,

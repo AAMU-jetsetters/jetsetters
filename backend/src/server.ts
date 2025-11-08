@@ -7,8 +7,6 @@ import publicRoutes from './routes/public.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import { waterDataService } from './services/water-data.service.js';
 import { notificationMonitorService } from './services/notification-monitor.service.js';
-import { notificationsService } from './services/notifications.service.js';
-import { emailService } from './services/email.service.js';
 import { ErrorHandler } from './middleware/error-handler.middleware.js';
 
 const app = express();

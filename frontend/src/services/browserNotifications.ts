@@ -54,7 +54,7 @@ export class BrowserNotificationService {
 
   async showNotification(
     title: string,
-    options: NotificationOptions = {}
+    options: NotificationOptions & { onclick?: () => void } = {}
   ): Promise<void> {
     if (!this.isSupported()) {
       return;
@@ -68,19 +68,20 @@ export class BrowserNotificationService {
     }
 
     try {
+      const { onclick, ...notificationOptions } = options;
       const notification = new Notification(title, {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         requireInteraction: false,
-        ...options,
+        ...notificationOptions,
       });
 
       notification.onclick = (event) => {
         event.preventDefault();
         window.focus();
         notification.close();
-        if (options.onclick) {
-          options.onclick(event as any);
+        if (onclick) {
+          onclick();
         }
       };
 

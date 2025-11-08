@@ -69,7 +69,8 @@ export class NotificationsService {
       return true;
     }
 
-    if (previous === 'critical' && current !== 'critical') {
+    const isRecoveringFromCritical = previous === 'critical';
+    if (isRecoveringFromCritical) {
       return true;
     }
 
@@ -87,7 +88,7 @@ export class NotificationsService {
     if (current === 'critical') {
       title = 'CRITICAL ALERT: Water Quality Emergency';
       message = 'Water quality has reached CRITICAL levels. DO NOT use water for drinking, cooking, or bathing. Seek alternative water sources immediately and follow guidance from local authorities.';
-    } else if (previous === 'critical' && current !== 'critical') {
+    } else if (previous === 'critical') {
       title = 'Water Quality Update: Conditions Improving';
       message = `Water quality has improved from CRITICAL to ${current.toUpperCase()}. While conditions are improving, please continue to follow safety guidelines. Current status: ${current.toUpperCase()}.`;
     } else if (current === 'stable') {
