@@ -58,7 +58,7 @@ function CommunityLogin({ onLoginSuccess, onNavigateToSignup }: CommunityLoginPr
           <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
         </div>
 
-        <h1 className="login-title">Welcome Back</h1>
+        <h1 className="login-title">Welcome</h1>
         <p className="login-subtitle">Sign in to monitor your water quality</p>
 
         {error && <div className="error-message">{error}</div>}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import type { MultiFactorResolver } from 'firebase/auth'
+import AdminLandingPage from './components/admin/AdminLandingPage'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import TwoFactorAuth from './components/TwoFactorAuth'
@@ -38,7 +39,7 @@ function AppContent() {
         if (location.pathname === '/community' || location.pathname === '/community/dashboard') {
           navigate('/community/login', { replace: true })
         }
-        if (location.pathname === '/admin' || location.pathname === '/admin/dashboard') {
+        if (location.pathname === '/admin/dashboard') {
           navigate('/admin/login', { replace: true })
         }
       }
@@ -75,7 +76,7 @@ function AppContent() {
         alert('Failed to send verification code. Please try again.')
       }
     } else {
-      navigate('/admin')
+      navigate('/admin/dashboard')
     }
   }
 
@@ -89,7 +90,7 @@ function AppContent() {
       }, 500)
     } else {
       console.log('Login successful! Welcome to Sentra!')
-      navigate('/admin')
+      navigate('/admin/dashboard')
     }
   }
 
@@ -104,7 +105,7 @@ function AppContent() {
   }
 
   const handleLogout = () => {
-    navigate('/admin/login')
+    navigate('/admin')
     setCurrentEmail('')
     console.log('User logged out')
   }
@@ -134,6 +135,10 @@ function AppContent() {
     console.log('Community user logged out')
   }
 
+  const handleEnterAdmin = () => {
+    navigate('/admin/login')
+  }
+
   if (isCheckingAuth) {
     return (
       <div className="app" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -148,6 +153,8 @@ function AppContent() {
       
       <Routes>
         <Route path="/" element={<Navigate to="/community" replace />} />
+        
+        <Route path="/admin" element={<AdminLandingPage onEnterAdmin={handleEnterAdmin} />} />
         
         <Route path="/admin/login" element={
           <Login 
@@ -183,7 +190,6 @@ function AppContent() {
           />
         } />
 
-        <Route path="/admin" element={<AnomalyOverview onLogout={handleLogout} />} />
         <Route path="/admin/dashboard" element={<AnomalyOverview onLogout={handleLogout} />} />
         
         <Route path="/community/login" element={

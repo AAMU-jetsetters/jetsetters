@@ -59,7 +59,7 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
           <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
         </div>
         
-        <h1 className="login-title">Welcome Back</h1>
+        <h1 className="login-title">Welcome</h1>
         <p className="login-subtitle">Log in to your account</p>
         
         {/* Hidden reCAPTCHA container */}
