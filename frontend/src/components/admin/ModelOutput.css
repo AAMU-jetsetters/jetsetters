@@ -44,12 +44,16 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .output-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .output-label {
@@ -64,6 +68,8 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .output-value.highlight {
