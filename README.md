@@ -29,7 +29,7 @@ Example:
 * ReactJS
 
 ### Link to Demo Presentation 📽
-{AAMU Jetsetters Presentation}(https://www.canva.com/design/DAG4CyeQGW4/4sSfCAHA_S1LJHvV-ceS0Q/view?utm_content=DAG4CyeQGW4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0a938676b0)
+[AAMU Jetsetters Presentation](https://www.canva.com/design/DAG4CyeQGW4/4sSfCAHA_S1LJHvV-ceS0Q/view?utm_content=DAG4CyeQGW4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0a938676b0)
 
 ### Team Checklist ✅
 - [✅] Team photo
