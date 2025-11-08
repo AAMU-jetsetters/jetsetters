@@ -87,7 +87,9 @@ export class OperatorDataService {
       'critical_security_score',
       'auth_failure_rate',
       'security_pump_interaction',
-      'config_change_during_anomaly'
+      'config_change_during_anomaly',
+      'system_health_score',
+      'operational_efficiency'
     );
 
     const rollingWindows = [3, 6, 12, 24];
@@ -282,6 +284,8 @@ export class OperatorDataService {
     const authFailureRate = itData.failed_login_attempts / (itData.remote_access_attempts + 1);
     const securityPumpInteraction = itData.scada_config_changes * activePumps;
     const configChangeDuringAnomaly = itData.scada_config_changes * (this.currentState?.anomalyScore || 0);
+    const systemHealthScore = 100 - (criticalSecurityScore / 10) - (this.currentState?.anomalyScore || 0) * 20;
+    const operationalEfficiency = (pumpEfficiency + (avgTankLevel / 100) * 50) / 1.5;
 
     return {
       total_tank_volume: this.roundToPrecision(totalTankVolume, 2),
@@ -305,6 +309,8 @@ export class OperatorDataService {
       auth_failure_rate: this.roundToPrecision(authFailureRate, 4),
       security_pump_interaction: securityPumpInteraction,
       config_change_during_anomaly: this.roundToPrecision(configChangeDuringAnomaly, 4),
+      system_health_score: this.roundToPrecision(Math.max(0, Math.min(100, systemHealthScore)), 2),
+      operational_efficiency: this.roundToPrecision(Math.max(0, Math.min(100, operationalEfficiency)), 2),
     };
   }
 
