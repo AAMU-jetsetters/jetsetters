@@ -1,19 +1,34 @@
 import { useState, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import { authService } from '../services/authService';
+import { adminFirebaseAuth } from '../services/adminFirebaseAuth';
+import { auth } from '../config/firebase';
+import type { MultiFactorResolver } from 'firebase/auth';
 import './TwoFactorAuth.css';
 
 interface TwoFactorAuthProps {
   email: string;
   flowType: 'signup' | 'login';
+  verificationId?: string;
+  resolver?: MultiFactorResolver;
+  userId?: string;
   onVerifySuccess?: () => void;
   onResendCode?: () => void;
 }
 
-function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFactorAuthProps) {
+function TwoFactorAuth({ 
+  email: _email, 
+  flowType, 
+  verificationId: initialVerificationId, 
+  resolver, 
+  userId: _userId,
+  onVerifySuccess, 
+  onResendCode 
+}: TwoFactorAuthProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [verificationId, setVerificationId] = useState(initialVerificationId || '');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (index: number, value: string) => {
@@ -56,7 +71,7 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
     inputRefs.current[focusIndex]?.focus();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -68,19 +83,56 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
       return;
     }
 
-    const result = flowType === 'signup' 
-      ? authService.verifySignupCode(email, fullCode)
-      : authService.verifyLoginCode(email, fullCode);
+    if (!verificationId) {
+      setError('Verification ID is missing. Please try again.');
+      return;
+    }
+
+    setLoading(true);
+
+    let result;
+    
+    if (flowType === 'signup') {
+      // Complete MFA enrollment
+      const user = auth.currentUser;
+      if (!user) {
+        setError('User session expired. Please sign up again.');
+        setLoading(false);
+        return;
+      }
+      
+      result = await adminFirebaseAuth.completeMFAEnrollment(
+        user,
+        verificationId,
+        fullCode,
+        'Phone number'
+      );
+    } else {
+      // Complete MFA sign-in
+      if (!resolver) {
+        setError('Authentication session expired. Please try again.');
+        setLoading(false);
+        return;
+      }
+      
+      result = await adminFirebaseAuth.completeMFASignIn(
+        resolver,
+        verificationId,
+        fullCode
+      );
+    }
+
+    setLoading(false);
 
     if (!result.success) {
-      setError(result.message);
+      setError(result.error || 'Verification failed. Please check your code.');
       setCode(Array(6).fill(''));
       inputRefs.current[0]?.focus();
       return;
     }
 
-    setSuccess(result.message);
-    console.log('Verification successful:', result.message);
+    setSuccess(flowType === 'signup' ? 'Account verified successfully!' : 'Login successful!');
+    console.log('MFA verification successful');
     
     // Delay to show success message
     setTimeout(() => {
@@ -90,16 +142,33 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
     }, 1000);
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setError('');
     setSuccess('');
     setCode(Array(6).fill(''));
-    
-    const result = authService.resendCode(email);
-    
-    if (result.success) {
-      setSuccess('New code sent! Check console for code.');
-      console.log('New 2FA code:', result.code);
+    setLoading(true);
+
+    if (flowType === 'login' && resolver) {
+      // Resend MFA verification for login
+      const result = await adminFirebaseAuth.sendMFAVerification(
+        resolver,
+        'recaptcha-container-2fa',
+        0
+      );
+      
+      setLoading(false);
+      
+      if (result.success && result.verificationId) {
+        setVerificationId(result.verificationId);
+        setSuccess('New code sent to your phone!');
+        console.log('New MFA code sent');
+      } else {
+        setError(result.error || 'Failed to resend code.');
+      }
+    } else {
+      // For signup flow, user needs to restart
+      setLoading(false);
+      setError('Please restart the signup process to receive a new code.');
     }
     
     inputRefs.current[0]?.focus();
@@ -114,8 +183,11 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
       <div className="twofa-card">
         <h1 className="twofa-title">Two-Factor Authentication</h1>
         <p className="twofa-subtitle">
-          Enter the 6-digit code sent to your registered phone number via SMS.
+          Enter the 6-digit code sent to your phone number via SMS.
         </p>
+        
+        {/* Hidden reCAPTCHA container for resend */}
+        <div id="recaptcha-container-2fa" style={{ display: 'none' }}></div>
         
         <form onSubmit={handleSubmit} className="twofa-form">
           {error && <div className="error-message">{error}</div>}
@@ -142,15 +214,16 @@ function TwoFactorAuth({ email, flowType, onVerifySuccess, onResendCode }: TwoFa
           <button 
             type="submit" 
             className="submit-button"
-            disabled={code.join('').length !== 6}
+            disabled={code.join('').length !== 6 || loading}
           >
-            Submit Code
+            {loading ? 'Verifying...' : 'Submit Code'}
           </button>
 
           <button 
             type="button" 
             className="resend-button"
             onClick={handleResend}
+            disabled={loading}
           >
             Resend Code
           </button>

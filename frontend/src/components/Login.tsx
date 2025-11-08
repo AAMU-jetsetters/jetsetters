@@ -1,32 +1,54 @@
-import { useState } from 'react';
-import { authService } from '../services/authService';
+import { useState, useEffect } from 'react';
+import { adminFirebaseAuth } from '../services/adminFirebaseAuth';
+import type { MultiFactorResolver } from 'firebase/auth';
 import './Login.css';
 
 interface LoginProps {
-  onLoginSuccess?: (email: string) => void;
+  onLoginSuccess?: (email: string, resolver?: MultiFactorResolver) => void;
   onNavigateToSignup?: () => void;
 }
 
 function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
-  const [emailOrUsername, setEmailOrUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Initialize invisible reCAPTCHA
+    adminFirebaseAuth.initRecaptcha('recaptcha-container-login', true);
+    
+    return () => {
+      adminFirebaseAuth.clearRecaptcha();
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const result = authService.login(emailOrUsername, password);
+    const result = await adminFirebaseAuth.loginWithEmail(email, password);
+
+    setLoading(false);
 
     if (!result.success) {
-      setError(result.message);
+      if (result.requiresMFA && result.resolver) {
+        // MFA is required, proceed to 2FA screen
+        console.log('MFA required for user');
+        if (onLoginSuccess) {
+          onLoginSuccess(email, result.resolver);
+        }
+      } else {
+        setError(result.error || 'Login failed. Please try again.');
+      }
       return;
     }
 
-    console.log('Login initiated, 2FA code:', result.code);
-    
+    // No MFA enrolled, login successful
+    console.log('Login successful (no MFA enrolled)');
     if (onLoginSuccess && result.user) {
-      onLoginSuccess(result.user.email);
+      onLoginSuccess(result.user.email || email);
     }
   };
 
@@ -34,30 +56,31 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
     <div className="login-container">
       <div className="login-card">
         <div className="logo-section">
-          <div className="logo-circle">
-            <span className="logo-icon">✈️</span>
-          </div>
-          <h2 className="brand-name">JetSetters</h2>
+          <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
         </div>
         
         <h1 className="login-title">Welcome Back</h1>
         <p className="login-subtitle">Log in to your account</p>
         
+        {/* Hidden reCAPTCHA container */}
+        <div id="recaptcha-container-login"></div>
+
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
-            <label htmlFor="emailOrUsername" className="form-label">
-              Email or Username
+            <label htmlFor="email" className="form-label">
+              Email
             </label>
             <input
-              type="text"
-              id="emailOrUsername"
+              type="email"
+              id="email"
               className="form-input"
-              placeholder="Enter your email or username"
-              value={emailOrUsername}
-              onChange={(e) => setEmailOrUsername(e.target.value)}
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -73,11 +96,12 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
-          <button type="submit" className="login-button">
-            Log In
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'Signing in...' : 'Log In'}
           </button>
 
           <a href="#" className="forgot-password-link">
@@ -90,6 +114,7 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
               type="button" 
               className="nav-link"
               onClick={onNavigateToSignup}
+              disabled={loading}
             >
               Sign Up
             </button>

@@ -3,7 +3,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-  OAuthProvider,
   signOut,
 } from 'firebase/auth';
 import type { User, UserCredential } from 'firebase/auth';
@@ -11,11 +10,6 @@ import { auth } from '../config/firebase';
 
 // Initialize providers
 const googleProvider = new GoogleAuthProvider();
-const appleProvider = new OAuthProvider('apple.com');
-
-// Configure Apple provider
-appleProvider.addScope('email');
-appleProvider.addScope('name');
 
 export interface AuthResult {
   success: boolean;
@@ -70,18 +64,6 @@ export const firebaseAuthService = {
       return { success: true, user: result.user };
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Apple Sign-In
-  signInWithApple: async (): Promise<AuthResult> => {
-    try {
-      const result: UserCredential = await signInWithPopup(auth, appleProvider);
-      console.log('Apple sign-in successful:', result.user.email);
-      return { success: true, user: result.user };
-    } catch (error: any) {
-      console.error('Apple sign-in error:', error);
       return { success: false, error: error.message };
     }
   },
