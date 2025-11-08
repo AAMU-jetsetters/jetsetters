@@ -8,17 +8,15 @@ _______________
 # Project Name
 
 ## Challenge Statement(s) Addressed 🎯
-**...include the challenge statement(s) the project worked to address**
-
-Examples:
-* How might we decrease the United States chances of alien and monster attacks given what we know from popular alien and monster movies?
-* How might we ....
+* How might we use AI to protect small public water systems without requiring IT staff or cloud access?
+* How might we bring AI-powered anomaly detection to rural infrastructure where connectivity is limited and stakes are high?
+* How might we make AI cybersecurity accessible to small communities?
 
 ## Project Description 🤯
-**....at least 3 sentences describing what the project does and how it works**
+Sentra is an AI-powered anomaly detection platform designed to protect small public water systems from cyber threats. It runs locally on edge devices, fusing OT and IT telemetry to detect suspicious behavior — even in low-connectivity environments. With grant-aligned pricing, plug-and-play setup, and out-of-band alerting, Sentra empowers rural operators to respond to risks without needing a cybersecurity team.
 
 ## Project Value 💰
-**....at least 3 sentences describing your target customer and tangible benefits from your solution**
+Sentra’s target customers are small public water systems — especially those in rural or underserved communities with limited IT staff and aging infrastructure. These operators often lack the resources to implement traditional cybersecurity solutions, leaving them vulnerable to service disruptions and costly post-attack recovery. Sentra delivers tangible benefits by providing AI-powered anomaly detection, real-time alerts, and public dashboards that run locally on edge devices — all with grant-aligned pricing and zero need for cloud access or cybersecurity expertise.
 
 ## Tech Overview 💻
 **... what tech was used to bring this project to life?**
@@ -34,24 +32,25 @@ Example:
 **...point us to your PPT or Canva slides 😍**
 
 ### Team Checklist ✅
-- [ ] Team photo
-- [ ] Team Slack channel
-- [ ] Communication established with mentor
-- [ ] Repo creation from this template
-- [ ] Flight Deck registration
+- [✅] Team photo
+- [✅] Team Slack channel
+- [✅] Communication established with mentor
+- [✅] Repo creation from this template
+- [✅] Flight Deck registration
 
 ### Project Checklist 🏁
-- [ ] Presentation complete and linked
-- [ ] Code merged to main branch
+- [✅] Presentation complete and linked
+- [✅] Code merged to main branch
 
 ### School Name 🏫
-The ABC School
+Alabama A&M University
 
 ### Team Name 🏷
-Coding Costars
+AAMU Jetsetters
 
 ### ✨ Contributors ✨
-**...tell the world who you and your team are 🙂**
-* Team member X 
-* Team member Y 
-* Team member Z 
+* Thabo Ibrahim Traore, Junior CS Major
+* Solomon Agyire, Junior CS Major
+* Zizwe Mtogna, Junior CS Major
+* Osamwengumwenru Oni-Ojo, Junior CS Major
+* Asia Harris, Junior CS Major
