@@ -161,18 +161,51 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   return (
     <div className="water-safety-page">
       <header className="mobile-header">
-        <div className="header-icon">
-          <img src="/src/assets/sentra_icon.png" alt="Sentra" className="header-logo" />
+        <div className="header-left">
+          <div className="header-icon">
+            <img src="/src/assets/sentra_icon.png" alt="Sentra" className="header-logo" />
+          </div>
+          
+          <nav className="header-nav">
+            <button
+              className={`header-nav-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => handleNavigate('home')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              <span>Home</span>
+            </button>
+            <button
+              className={`header-nav-item ${activeTab === 'metrics' ? 'active' : ''}`}
+              onClick={() => handleNavigate('metrics')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <span>Metrics</span>
+            </button>
+            <button
+              className={`header-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => handleNavigate('profile')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span>Profile</span>
+            </button>
+          </nav>
         </div>
-        {activeTab !== 'notifications' && (
-          <button className="notification-bell" onClick={handleNotificationClick}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            {hasNotification && <span className="notification-badge"></span>}
-          </button>
-        )}
+
+        <button className="notification-bell" onClick={handleNotificationClick}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          {hasNotification && <span className="notification-badge"></span>}
+        </button>
       </header>
 
 
