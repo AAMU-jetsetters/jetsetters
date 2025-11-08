@@ -9,6 +9,10 @@ import HistoricalTrends from '../../components/common/HistoricalTrends';
 import DiagnosticsForensics from './DiagnosticsForensics';
 import AIAnalystChat from './AIAnalystChat';
 import CommunityReports from './CommunityReports';
+import { useAnomalyData } from '../../hooks/useAnomalyData';
+import { useSystemMetrics } from '../../hooks/useSystemMetrics';
+import { useAlerts } from '../../hooks/useAlerts';
+import { useIncidents } from '../../hooks/useIncidents';
 import './AnomalyOverview.css';
 
 interface AnomalyOverviewProps {
@@ -17,49 +21,30 @@ interface AnomalyOverviewProps {
 
 function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
   const [activeNav, setActiveNav] = useState('anomaly-overview');
+  const [anomalyTimeRange, setAnomalyTimeRange] = useState<7 | 30 | 90>(7);
 
-  const alerts = [
-    { id: '1', type: 'Pump Failure', status: 'Active' as const, time: '2023-10-26 14:30 UTC', severity: 'Critical' as const },
-    { id: '2', type: 'Pressure Drop', status: 'Active' as const, time: '2023-10-26 14:20 UTC', severity: 'Critical' as const },
-    { id: '3', type: 'Sensor Anomaly', status: 'Acknowledged' as const, time: '2023-10-26 14:15 UTC', severity: 'High' as const },
-    { id: '4', type: 'Network Latency', status: 'Active' as const, time: '2023-10-26 14:00 UTC', severity: 'Medium' as const },
-    { id: '5', type: 'Filter Clog', status: 'Resolved' as const, time: '2023-10-26 13:45 UTC', severity: 'Low' as const },
-    { id: '6', type: 'Power Fluctuation', status: 'Acknowledged' as const, time: '2023-10-26 13:30 UTC', severity: 'Medium' as const },
-  ];
+  const days = anomalyTimeRange;
+  const { current: anomalyCurrent, history: anomalyHistory, loading: anomalyLoading } = useAnomalyData(60000, days);
+  const { systemStatus, networkHealth } = useSystemMetrics(60000);
+  const { alerts, loading: alertsLoading } = useAlerts(60000);
+  const { incidents, loading: incidentsLoading } = useIncidents(60000);
 
-  const anomalyTrend = [
-    { date: 'Nov 1', value: 0.65 },
-    { date: 'Nov 2', value: 0.72 },
-    { date: 'Nov 3', value: 0.68 },
-    { date: 'Nov 4', value: 0.85 },
-    { date: 'Nov 5', value: 0.88 },
-    { date: 'Nov 6', value: 0.82 },
-    { date: 'Nov 7', value: 0.88 },
-  ];
+  const handleTimeRangeChange = (range: '7days' | '30days' | '90days') => {
+    const daysMap: Record<'7days' | '30days' | '90days', 7 | 30 | 90> = { '7days': 7, '30days': 30, '90days': 90 };
+    setAnomalyTimeRange(daysMap[range]);
+  };
 
-  const incidents = [
-    {
-      id: '1',
-      timestamp: '2023-10-26 14:35 UTC',
-      status: 'Open',
-      description: 'Critical system anomaly detected in Pump Station 3. Multiple sensors reporting out-of-range values. Immediate investigation required.',
-      severity: 'Critical' as const,
-    },
-    {
-      id: '2',
-      timestamp: '2023-10-26 14:20 UTC',
-      status: 'Investigating',
-      description: 'Unusual pressure readings in Tank T1. Potential leak or sensor malfunction. Maintenance team dispatched.',
-      severity: 'High' as const,
-    },
-    {
-      id: '3',
-      timestamp: '2023-10-26 14:05 UTC',
-      status: 'Investigating',
-      description: 'Water quality parameters slightly out of optimal range. pH levels trending downward. Monitoring closely.',
-      severity: 'Medium' as const,
-    },
-  ];
+  const formatAnomalyTrend = () => {
+    if (!anomalyHistory || anomalyHistory.length === 0) {
+      return [];
+    }
+    
+    return anomalyHistory
+      .map((point) => ({
+        date: point.label || point.date,
+        value: point.value,
+      }));
+  };
 
   const getPageTitle = () => {
     switch (activeNav) {
@@ -86,60 +71,86 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
             <>
               {/* Data Cards Row */}
               <section className="data-cards-section">
-                <DataCard
-                  title="System Status"
-                  status={{ label: 'High Alert', type: 'warning' }}
-                  detail="Anomaly Score: 0.88"
-                  description="Overall operational health based on AI/ML anomaly detection."
-                  icon="⚠️"
-                />
-                <DataCard
-                  title="Water Quality Index"
-                  value="7.8"
-                  trend={{ value: '+0.2', direction: 'up' }}
-                  description="Optimal range: 7.0 - 8.5"
-                />
-                <DataCard
-                  title="Total Pump Flow Rate"
-                  value="1250m³/hr"
-                  description="Current aggregated flow rate"
-                />
-                <DataCard
-                  title="Tank T1 Level"
-                  value="78%"
-                  trend={{ value: '-2%', direction: 'down' }}
-                  description="Live vs Predicted: 78% vs 80%"
-                />
+                {anomalyCurrent && systemStatus ? (
+                  <>
+                    <DataCard
+                      title="System Status"
+                      status={{
+                        label: systemStatus.systemStatus.label,
+                        type: systemStatus.systemStatus.statusType,
+                      }}
+                      detail={`Anomaly Score: ${anomalyCurrent.anomalyScore.toFixed(2)}`}
+                      description="Overall operational health based on AI/ML anomaly detection."
+                      icon="⚠️"
+                    />
+                    <DataCard
+                      title="Water Quality Index"
+                      value={systemStatus.waterQualityIndex.value.toFixed(1)}
+                      trend={systemStatus.waterQualityIndex.trend}
+                      description={`Optimal range: ${systemStatus.waterQualityIndex.optimalRange}`}
+                    />
+                    <DataCard
+                      title="Total Pump Flow Rate"
+                      value={systemStatus.pumpFlowRate.value}
+                      description={systemStatus.pumpFlowRate.description}
+                    />
+                    <DataCard
+                      title="Tank T1 Level"
+                      value={systemStatus.tankT1Level.value}
+                      trend={systemStatus.tankT1Level.trend}
+                      description={`Live vs Predicted: ${systemStatus.tankT1Level.liveVsPredicted}`}
+                    />
+                  </>
+                ) : (
+                  <div>Loading system data...</div>
+                )}
               </section>
 
               {/* Alerts and Network Health Row */}
               <section className="alerts-network-section">
                 <div className="alerts-column">
-                  <AlertList alerts={alerts} />
+                  {alertsLoading ? (
+                    <div>Loading alerts...</div>
+                  ) : (
+                    <AlertList alerts={alerts} />
+                  )}
                 </div>
                 <div className="network-column">
-                  <NetworkHealth
-                    status="warning"
-                    trafficVolume="1.2 Gbps"
-                    failedConnections={15}
-                  />
+                  {networkHealth ? (
+                    <NetworkHealth
+                      status={networkHealth.status}
+                      trafficVolume={networkHealth.trafficVolume}
+                      failedConnections={networkHealth.failedConnections}
+                    />
+                  ) : (
+                    <div>Loading network health...</div>
+                  )}
                 </div>
               </section>
 
               {/* Historical Trends Section */}
               <section className="trends-section">
-                <HistoricalTrends
-                  title="Anomaly Score Trend"
-                  data={anomalyTrend}
-                  timeRange="7days"
-                  unit="Score"
-                  variant="admin"
-                />
+                {anomalyLoading ? (
+                  <div>Loading anomaly trends...</div>
+                ) : (
+                  <HistoricalTrends
+                    title="Anomaly Score Trend"
+                    data={formatAnomalyTrend()}
+                    timeRange={anomalyTimeRange === 7 ? '7days' : anomalyTimeRange === 30 ? '30days' : '90days'}
+                    onTimeRangeChange={handleTimeRangeChange}
+                    unit="Score"
+                    variant="admin"
+                  />
+                )}
               </section>
 
               {/* Recent Incidents Section */}
               <section className="incidents-section">
-                <IncidentList incidents={incidents} />
+                {incidentsLoading ? (
+                  <div>Loading incidents...</div>
+                ) : (
+                  <IncidentList incidents={incidents} />
+                )}
               </section>
             </>
           )}

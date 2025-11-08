@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './HistoricalTrends.css';
 
 interface TrendData {
@@ -26,6 +26,10 @@ function HistoricalTrends({
 }: HistoricalTrendsProps) {
   const [selectedRange, setSelectedRange] = useState(timeRange);
 
+  useEffect(() => {
+    setSelectedRange(timeRange);
+  }, [timeRange]);
+
   const handleRangeChange = (e: React.MouseEvent, range: '7days' | '30days' | '90days') => {
     e.preventDefault();
     e.stopPropagation();
@@ -35,9 +39,14 @@ function HistoricalTrends({
     }
   };
 
-  const maxValue = Math.max(...data.map((d) => d.value));
-  const minValue = Math.min(...data.map((d) => d.value));
-  const range = maxValue - minValue || 1;
+  const maxValue = Math.max(...data.map((d) => d.value), 0.1);
+  const minValue = Math.min(...data.map((d) => d.value), 0);
+  const range = maxValue - minValue || 0.1;
+  
+  const padding = range * 0.1;
+  const adjustedMax = maxValue + padding;
+  const adjustedMin = Math.max(0, minValue - padding);
+  const adjustedRange = adjustedMax - adjustedMin || 0.1;
 
   return (
     <div className={`historical-trends ${variant}`}>
@@ -70,9 +79,9 @@ function HistoricalTrends({
 
       <div className="chart-container">
         <div className="y-axis">
-          <span className="axis-value">{maxValue.toFixed(1)}</span>
-          <span className="axis-value">{((maxValue + minValue) / 2).toFixed(1)}</span>
-          <span className="axis-value">{minValue.toFixed(1)}</span>
+          <span className="axis-value">{adjustedMax.toFixed(2)}</span>
+          <span className="axis-value">{((adjustedMax + adjustedMin) / 2).toFixed(2)}</span>
+          <span className="axis-value">{adjustedMin.toFixed(2)}</span>
         </div>
 
         <div className="chart-area">
@@ -86,43 +95,46 @@ function HistoricalTrends({
             <path
               d={`M 0 200 ${data
                 .map((point, index) => {
-                  const x = (index / (data.length - 1)) * 600;
-                  const y = 200 - ((point.value - minValue) / range) * 180;
+                  const x = (index / (Math.max(1, data.length - 1))) * 600;
+                  const y = 200 - ((point.value - adjustedMin) / adjustedRange) * 180;
                   return `L ${x} ${y}`;
                 })
                 .join(' ')} L 600 200 Z`}
-              fill={variant === 'admin' ? 'rgba(167, 139, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)'}
+              fill={variant === 'admin' ? 'rgba(167, 139, 250, 0.15)' : 'rgba(59, 130, 246, 0.15)'}
             />
 
             {/* Line */}
             <polyline
               points={data
                 .map((point, index) => {
-                  const x = (index / (data.length - 1)) * 600;
-                  const y = 200 - ((point.value - minValue) / range) * 180;
+                  const x = (index / (Math.max(1, data.length - 1))) * 600;
+                  const y = 200 - ((point.value - adjustedMin) / adjustedRange) * 180;
                   return `${x},${y}`;
                 })
                 .join(' ')}
               fill="none"
               stroke={variant === 'admin' ? '#a78bfa' : '#3b82f6'}
-              strokeWidth="3"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
 
-            {/* Data points */}
+            {/* Data points - only show every nth point for cleaner look */}
             {data.map((point, index) => {
-              const x = (index / (data.length - 1)) * 600;
-              const y = 200 - ((point.value - minValue) / range) * 180;
+              if (data.length > 50 && index % Math.ceil(data.length / 30) !== 0) {
+                return null;
+              }
+              const x = (index / (Math.max(1, data.length - 1))) * 600;
+              const y = 200 - ((point.value - adjustedMin) / adjustedRange) * 180;
               return (
                 <circle
                   key={index}
                   cx={x}
                   cy={y}
-                  r="4"
+                  r="3"
                   fill={variant === 'admin' ? '#a78bfa' : '#3b82f6'}
                   stroke="#1a1a1a"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                 />
               );
             })}

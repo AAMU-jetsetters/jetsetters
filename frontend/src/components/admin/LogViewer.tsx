@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import './LogViewer.css';
 
 interface LogEntry {
@@ -12,49 +12,137 @@ interface LogEntry {
 
 interface LogViewerProps {
   logs?: LogEntry[];
+  loading?: boolean;
 }
 
-function LogViewer({ logs: initialLogs }: LogViewerProps) {
+const LOGS_PER_PAGE = 25;
+
+function LogViewer({ logs: initialLogs, loading = false }: LogViewerProps) {
   const [componentFilter, setComponentFilter] = useState('');
-  const [timeWindow, setTimeWindow] = useState('');
+  const [severityFilter, setSeverityFilter] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const defaultLogs: LogEntry[] = [
-    {
-      id: '1',
-      timestamp: '11/7/2025, 6:40:47 PM',
-      component: 'Firewall',
-      eventType: 'Deny',
-      message: 'Attempted unauthorized access from 192.168.1.100',
-      severity: 'Warning',
-    },
-    {
-      id: '2',
-      timestamp: '11/7/2025, 7:00:47 PM',
-      component: 'SCADA_Server',
-      eventType: 'Data Read',
-      message: 'Sensor data read from L_T1',
-      severity: 'Info',
-    },
-    {
-      id: '3',
-      timestamp: '11/7/2025, 7:10:47 PM',
-      component: 'Pump Controller',
-      eventType: 'Command',
-      message: 'Pump F_PU1 speed',
-      severity: 'Info',
-    },
-  ];
+  const filteredLogs = useMemo(() => {
+    if (!initialLogs) return [];
+    let filtered = [...initialLogs];
+    
+    if (componentFilter) {
+      filtered = filtered.filter((log) =>
+        log.component.toLowerCase().includes(componentFilter.toLowerCase())
+      );
+    }
+    
+    if (severityFilter) {
+      filtered = filtered.filter((log) =>
+        log.severity.toLowerCase() === severityFilter.toLowerCase()
+      );
+    }
+    
+    return filtered;
+  }, [initialLogs, componentFilter, severityFilter]);
 
-  const logs = initialLogs || defaultLogs;
+  const totalPages = Math.ceil(filteredLogs.length / LOGS_PER_PAGE);
+  const startIndex = (currentPage - 1) * LOGS_PER_PAGE;
+  const endIndex = startIndex + LOGS_PER_PAGE;
+  const logs = filteredLogs.slice(startIndex, endIndex);
 
-  const handleApplyFilters = () => {
-    console.log('Filters applied:', { componentFilter, timeWindow });
-    // Filter logic here
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return timestamp;
+    }
+  };
+
+  const handleExportPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Cyber Log Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background-color: #1a1a1a; color: white; padding: 12px; text-align: left; border: 1px solid #333; }
+            td { padding: 10px; border: 1px solid #ddd; }
+            tr:nth-child(even) { background-color: #f9fafb; }
+            .severity-info { color: #3b82f6; font-weight: bold; }
+            .severity-warning { color: #f59e0b; font-weight: bold; }
+            .severity-error { color: #ef4444; font-weight: bold; }
+            .footer { margin-top: 30px; font-size: 12px; color: #6b7280; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h1>Cyber Log Report</h1>
+          <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Total Logs:</strong> ${filteredLogs.length}</p>
+          <p><strong>Filters:</strong> ${componentFilter ? `Component: ${componentFilter}` : ''} ${severityFilter ? `Severity: ${severityFilter}` : ''}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Component</th>
+                <th>Event Type</th>
+                <th>Message</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredLogs.map((log) => `
+                <tr>
+                  <td>${formatTimestamp(log.timestamp)}</td>
+                  <td>${log.component}</td>
+                  <td>${log.eventType}</td>
+                  <td>${log.message}</td>
+                  <td class="severity-${log.severity.toLowerCase()}">${log.severity}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            <p>Water System Cyber Defense - Operator Dashboard</p>
+            <p>This is an automated report generated from the system logs.</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   };
 
   return (
     <div className="log-viewer">
-      <h3 className="log-viewer-title">Cyber Log Viewer</h3>
+      <div className="log-viewer-header">
+        <h3 className="log-viewer-title">Cyber Log Viewer</h3>
+        <button className="export-pdf-btn" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>
+          Export to PDF
+        </button>
+      </div>
       
       <div className="log-filters">
         <input
@@ -62,47 +150,82 @@ function LogViewer({ logs: initialLogs }: LogViewerProps) {
           className="filter-input"
           placeholder="Filter component..."
           value={componentFilter}
-          onChange={(e) => setComponentFilter(e.target.value)}
+          onChange={(e) => {
+            setComponentFilter(e.target.value);
+            setCurrentPage(1);
+          }}
         />
-        <input
-          type="text"
+        <select
           className="filter-input"
-          placeholder="e.g., last 24h"
-          value={timeWindow}
-          onChange={(e) => setTimeWindow(e.target.value)}
-        />
-        <button className="apply-filters-btn" onClick={handleApplyFilters}>
-          Apply Filters
-        </button>
+          value={severityFilter}
+          onChange={(e) => {
+            setSeverityFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Severities</option>
+          <option value="info">Info</option>
+          <option value="warning">Warning</option>
+          <option value="error">Error</option>
+        </select>
       </div>
 
       <div className="log-table-container">
-        <table className="log-table">
-          <thead>
-            <tr>
-              <th>TIMESTAMP</th>
-              <th>COMPONENT</th>
-              <th>EVENT TYPE</th>
-              <th>MESSAGE</th>
-              <th>SEVERITY</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log.id}>
-                <td className="log-timestamp">{log.timestamp}</td>
-                <td className="log-component">{log.component}</td>
-                <td className="log-event-type">{log.eventType}</td>
-                <td className="log-message">{log.message}</td>
-                <td>
-                  <span className={`severity-badge severity-${log.severity.toLowerCase()}`}>
-                    {log.severity}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <div style={{ padding: '20px', textAlign: 'center' }}>Loading logs...</div>
+        ) : filteredLogs.length === 0 ? (
+          <div style={{ padding: '20px', textAlign: 'center' }}>No logs found</div>
+        ) : (
+          <>
+            <table className="log-table">
+              <thead>
+                <tr>
+                  <th>TIMESTAMP</th>
+                  <th>COMPONENT</th>
+                  <th>EVENT TYPE</th>
+                  <th>MESSAGE</th>
+                  <th>SEVERITY</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => (
+                  <tr key={log.id}>
+                    <td className="log-timestamp">{formatTimestamp(log.timestamp)}</td>
+                    <td className="log-component">{log.component}</td>
+                    <td className="log-event-type">{log.eventType}</td>
+                    <td className="log-message">{log.message}</td>
+                    <td>
+                      <span className={`severity-badge severity-${log.severity.toLowerCase()}`}>
+                        {log.severity}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {totalPages > 1 && (
+              <div className="log-pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <span className="pagination-info">
+                  Page {currentPage} of {totalPages} ({filteredLogs.length} total logs)
+                </span>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

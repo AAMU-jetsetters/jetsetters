@@ -1,11 +1,19 @@
 import './ChartWidget.css';
+import type { SensorDataPoint } from '../../services/adminApi';
 
 interface ChartWidgetProps {
   title?: string;
   showLiveBadge?: boolean;
+  sensorData?: SensorDataPoint[];
+  loading?: boolean;
 }
 
-function ChartWidget({ title = 'Multi-Series Sensor Data with Anomaly Score', showLiveBadge = true }: ChartWidgetProps) {
+function ChartWidget({ 
+  title = 'Multi-Series Sensor Data with Anomaly Score', 
+  showLiveBadge = true,
+  sensorData: _sensorData = [],
+  loading: _loading = false
+}: ChartWidgetProps) {
   return (
     <div className="chart-widget">
       <div className="chart-widget-header">

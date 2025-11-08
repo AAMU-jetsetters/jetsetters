@@ -1,10 +1,41 @@
 import './SchematicWidget.css';
+import type { SchematicComponentStatus } from '../../services/adminApi';
 
 interface SchematicWidgetProps {
   title?: string;
+  componentStatus?: SchematicComponentStatus[];
 }
 
-function SchematicWidget({ title = 'Water Network Schematic' }: SchematicWidgetProps) {
+function SchematicWidget({ title = 'Water Network Schematic', componentStatus = [] }: SchematicWidgetProps) {
+  const getComponentStatus = (componentId: string): 'normal' | 'warning' | 'critical' => {
+    const status = componentStatus.find((c) => c.componentId === componentId);
+    return status?.status || 'normal';
+  };
+
+  const hasAlert = (componentId: string): boolean => {
+    const status = componentStatus.find((c) => c.componentId === componentId);
+    return status?.alert || false;
+  };
+
+  const t1Status = getComponentStatus('T1');
+  const t2Status = getComponentStatus('T2');
+  const pu1Status = getComponentStatus('PU1');
+  const pu1Alert = hasAlert('PU1');
+
+  const getStrokeColor = (status: 'normal' | 'warning' | 'critical'): string => {
+    switch (status) {
+      case 'critical':
+        return '#ef4444';
+      case 'warning':
+        return '#f59e0b';
+      default:
+        return '#14b8a6';
+    }
+  };
+
+  const getStrokeWidth = (status: 'normal' | 'warning' | 'critical'): number => {
+    return status === 'critical' ? 3 : status === 'warning' ? 2.5 : 2;
+  };
   return (
     <div className="schematic-widget">
       <h3 className="schematic-title">{title}</h3>
@@ -17,12 +48,30 @@ function SchematicWidget({ title = 'Water Network Schematic' }: SchematicWidgetP
           <line x1="200" y1="100" x2="200" y2="200" stroke="#3a3a3a" strokeWidth="4" />
           
           {/* Tank (left) */}
-          <rect x="30" y="130" width="40" height="40" fill="#2a2a2a" stroke="#14b8a6" strokeWidth="2" rx="4" />
+          {pu1Alert && <circle cx="200" cy="150" r="30" fill="#ef4444" opacity="0.2" />}
+          <rect 
+            x="30" 
+            y="130" 
+            width="40" 
+            height="40" 
+            fill="#2a2a2a" 
+            stroke={getStrokeColor(t1Status)} 
+            strokeWidth={getStrokeWidth(t1Status)} 
+            rx="4" 
+          />
           <text x="50" y="155" fill="#ffffff" fontSize="10" textAnchor="middle">T1</text>
           
-          {/* Pump (center - highlighted in red) */}
-          <circle cx="200" cy="150" r="30" fill="#ef4444" opacity="0.2" />
-          <rect x="180" y="130" width="40" height="40" fill="#2a2a2a" stroke="#ef4444" strokeWidth="3" rx="4" />
+          {/* Pump (center) */}
+          <rect 
+            x="180" 
+            y="130" 
+            width="40" 
+            height="40" 
+            fill="#2a2a2a" 
+            stroke={getStrokeColor(pu1Status)} 
+            strokeWidth={getStrokeWidth(pu1Status)} 
+            rx="4" 
+          />
           <text x="200" y="155" fill="#ffffff" fontSize="10" textAnchor="middle">PU1</text>
           
           {/* Valve (top) */}
@@ -34,7 +83,16 @@ function SchematicWidget({ title = 'Water Network Schematic' }: SchematicWidgetP
           <line x1="190" y1="220" x2="210" y2="220" stroke="#666666" strokeWidth="2" />
           
           {/* Tank (right) */}
-          <rect x="330" y="130" width="40" height="40" fill="#2a2a2a" stroke="#14b8a6" strokeWidth="2" rx="4" />
+          <rect 
+            x="330" 
+            y="130" 
+            width="40" 
+            height="40" 
+            fill="#2a2a2a" 
+            stroke={getStrokeColor(t2Status)} 
+            strokeWidth={getStrokeWidth(t2Status)} 
+            rx="4" 
+          />
           <text x="350" y="155" fill="#ffffff" fontSize="10" textAnchor="middle">T2</text>
           
           {/* Junction points */}
@@ -43,7 +101,9 @@ function SchematicWidget({ title = 'Water Network Schematic' }: SchematicWidgetP
           
           {/* Labels */}
           <text x="200" y="30" fill="#a0a0a0" fontSize="12" textAnchor="middle" fontFamily="Ubuntu">Water Network Overview</text>
-          <text x="200" y="280" fill="#ef4444" fontSize="11" textAnchor="middle" fontFamily="Ubuntu">⚠ Alert: Pump PU1</text>
+          {pu1Alert && (
+            <text x="200" y="280" fill="#ef4444" fontSize="11" textAnchor="middle" fontFamily="Ubuntu">⚠ Alert: Pump PU1</text>
+          )}
         </svg>
       </div>
     </div>

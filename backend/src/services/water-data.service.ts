@@ -7,6 +7,8 @@ import {
   TimeSeriesPoint,
   AttackScenario,
 } from '../types/index.js';
+import { operatorDataService } from './operator-data.service.js';
+import { OperatorDataMapper } from '../utils/operator-data-mapper.js';
 
 export class WaterDataService {
   private currentState: TimeSeriesPoint;
@@ -201,7 +203,19 @@ export class WaterDataService {
       maxRisk += weight;
     });
 
-    const riskPercentage = (totalRisk / maxRisk) * 100;
+    let riskPercentage = (totalRisk / maxRisk) * 100;
+    
+    try {
+      const currentState = operatorDataService.getCurrentState();
+      const wqi = OperatorDataMapper.calculateWaterQualityIndex(currentState);
+      
+      const wqiNormalized = ((wqi.value - 7.0) / 1.5) * 100;
+      const wqiRisk = Math.max(0, Math.min(100, 100 - wqiNormalized));
+      
+      riskPercentage = (riskPercentage * 0.7) + (wqiRisk * 0.3);
+    } catch (error) {
+    }
+
     return Math.min(100, Math.round(riskPercentage));
   }
 
