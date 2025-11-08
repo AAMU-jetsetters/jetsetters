@@ -83,8 +83,8 @@ def predict():
                 'anomaly_score': 0.0
             }), 400
         
-        sequence_flat = sequence.flatten()
-        sequence_scaled = scaler.transform([sequence_flat])
+        latest_features = sequence[-1]
+        sequence_scaled = scaler.transform([latest_features])
         
         prediction = model.predict_proba(sequence_scaled)[0]
         
