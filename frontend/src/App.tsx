@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import type { MultiFactorResolver } from 'firebase/auth'
 import Login from './components/Login'
 import Signup from './components/Signup'
@@ -11,11 +12,11 @@ import { auth } from './config/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import './App.css'
 
-type Screen = 'login' | 'signup' | 'twofa-signup' | 'twofa-login' | 'success' | 'admin-dashboard' | 'community-dashboard' | 'community-login' | 'community-signup';
 type FlowType = 'signup' | 'login';
 
-function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('community-login')
+function AppContent() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [currentEmail, setCurrentEmail] = useState<string>('')
   const [flowType, setFlowType] = useState<FlowType>('login')
   const [verificationId, setVerificationId] = useState<string>('')
@@ -24,34 +25,34 @@ function App() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   useEffect(() => {
-  
     document.documentElement.setAttribute('data-theme', 'dark')
     document.body.setAttribute('data-theme', 'dark')
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsCheckingAuth(false)
       if (user) {
-      
-        if (currentScreen === 'community-login' || currentScreen === 'community-signup') {
-          setCurrentScreen('community-dashboard')
+        if (location.pathname.startsWith('/community') && (location.pathname === '/community/login' || location.pathname === '/community/signup')) {
+          navigate('/community', { replace: true })
         }
       } else {
-        // User is not authenticated
-        if (currentScreen === 'community-dashboard') {
-          setCurrentScreen('community-login')
+        if (location.pathname === '/community' || location.pathname === '/community/dashboard') {
+          navigate('/community/login', { replace: true })
+        }
+        if (location.pathname === '/admin' || location.pathname === '/admin/dashboard') {
+          navigate('/admin/login', { replace: true })
         }
       }
     })
 
     return () => unsubscribe()
-  }, [currentScreen])
+  }, [location.pathname, navigate])
 
   const handleSignupSuccess = (email: string, verificationId?: string, userId?: string) => {
     setCurrentEmail(email)
     setFlowType('signup')
     setVerificationId(verificationId || '')
     setUserId(userId || '')
-    setCurrentScreen('twofa-signup')
+    navigate('/admin/twofa-signup')
   }
 
   const handleLoginSuccess = async (email: string, resolver?: MultiFactorResolver) => {
@@ -60,24 +61,21 @@ function App() {
     setMfaResolver(resolver)
     
     if (resolver) {
-      // MFA required, send SMS code
       console.log('Sending MFA verification code...')
       
-      // Send SMS code automatically
       const result = await import('./services/adminFirebaseAuth').then(module => 
         module.adminFirebaseAuth.sendMFAVerification(resolver, 'recaptcha-container-mfa-login', 0)
       );
       
       if (result.success && result.verificationId) {
         setVerificationId(result.verificationId)
-    setCurrentScreen('twofa-login')
+        navigate('/admin/twofa-login')
       } else {
         console.error('Failed to send MFA code:', result.error)
         alert('Failed to send verification code. Please try again.')
       }
     } else {
-      // No MFA enrolled, go directly to dashboard
-      setCurrentScreen('admin-dashboard')
+      navigate('/admin')
     }
   }
 
@@ -85,71 +83,56 @@ function App() {
     if (flowType === 'signup') {
       console.log('Signup completed! Redirecting to login...')
       setTimeout(() => {
-        setCurrentScreen('login')
+        navigate('/admin/login')
         setCurrentEmail('')
         alert('Account created successfully! Please log in.')
       }, 500)
     } else {
       console.log('Login successful! Welcome to Sentra!')
-      setCurrentScreen('admin-dashboard')
+      navigate('/admin')
     }
   }
 
-  // Navigation handlers
   const handleNavigateToLogin = () => {
-    setCurrentScreen('login')
+    navigate('/admin/login')
     setCurrentEmail('')
   }
 
   const handleNavigateToSignup = () => {
-    setCurrentScreen('signup')
+    navigate('/admin/signup')
     setCurrentEmail('')
   }
 
   const handleLogout = () => {
-    setCurrentScreen('login')
+    navigate('/admin/login')
     setCurrentEmail('')
     console.log('User logged out')
   }
 
-  // Community auth handlers
   const handleCommunityLoginSuccess = () => {
     console.log('Community user logged in successfully')
-    setCurrentScreen('community-dashboard')
+    navigate('/community')
   }
 
   const handleCommunitySignupSuccess = () => {
     console.log('Community user signed up successfully')
-    setCurrentScreen('community-dashboard')
+    navigate('/community')
   }
 
   const handleNavigateToCommunityLogin = () => {
-    setCurrentScreen('community-login')
+    navigate('/community/login')
     setCurrentEmail('')
   }
 
   const handleNavigateToCommunitySignup = () => {
-    setCurrentScreen('community-signup')
+    navigate('/community/signup')
     setCurrentEmail('')
   }
 
   const handleCommunityLogout = () => {
-    setCurrentScreen('community-login')
+    navigate('/community/login')
     console.log('Community user logged out')
   }
-
-  const renderSuccessScreen = () => (
-    <div className="success-container">
-      <div className="success-card">
-        <div className="success-icon">✅</div>
-        <h1 className="success-title">Welcome to Sentra!</h1>
-        <p className="success-message">You have successfully logged in.</p>
-        <button className="success-button" onClick={handleNavigateToLogin}>
-          Log Out
-        </button>
-      </div>
-    </div>
-  )
 
   if (isCheckingAuth) {
     return (
@@ -161,63 +144,74 @@ function App() {
 
   return (
     <div className="app">
-      {/* Hidden reCAPTCHA container for MFA login flow */}
       <div id="recaptcha-container-mfa-login" style={{ display: 'none' }}></div>
       
-      {currentScreen === 'login' && (
-        <Login 
-          onLoginSuccess={handleLoginSuccess}
-          onNavigateToSignup={handleNavigateToSignup}
-        />
-      )}
-      
-      {currentScreen === 'signup' && (
-        <Signup 
-          onSignupSuccess={handleSignupSuccess}
-          onNavigateToLogin={handleNavigateToLogin}
-        />
-      )}
-      
-      {currentScreen === 'twofa-signup' && (
-        <TwoFactorAuth 
-          email={currentEmail}
-          flowType="signup"
-          verificationId={verificationId}
-          userId={userId}
-          onVerifySuccess={handleVerifySuccess}
-        />
-      )}
+      <Routes>
+        <Route path="/" element={<Navigate to="/community" replace />} />
+        
+        <Route path="/admin/login" element={
+          <Login 
+            onLoginSuccess={handleLoginSuccess}
+            onNavigateToSignup={handleNavigateToSignup}
+          />
+        } />
+        
+        <Route path="/admin/signup" element={
+          <Signup 
+            onSignupSuccess={handleSignupSuccess}
+            onNavigateToLogin={handleNavigateToLogin}
+          />
+        } />
+        
+        <Route path="/admin/twofa-signup" element={
+          <TwoFactorAuth 
+            email={currentEmail}
+            flowType="signup"
+            verificationId={verificationId}
+            userId={userId}
+            onVerifySuccess={handleVerifySuccess}
+          />
+        } />
 
-      {currentScreen === 'twofa-login' && (
-        <TwoFactorAuth 
-          email={currentEmail}
-          flowType="login"
-          verificationId={verificationId}
-          resolver={mfaResolver}
-          onVerifySuccess={handleVerifySuccess}
-        />
-      )}
+        <Route path="/admin/twofa-login" element={
+          <TwoFactorAuth 
+            email={currentEmail}
+            flowType="login"
+            verificationId={verificationId}
+            resolver={mfaResolver}
+            onVerifySuccess={handleVerifySuccess}
+          />
+        } />
 
-      {currentScreen === 'success' && renderSuccessScreen()}
-      
-      {currentScreen === 'admin-dashboard' && <AnomalyOverview onLogout={handleLogout} />}
+        <Route path="/admin" element={<AnomalyOverview onLogout={handleLogout} />} />
+        <Route path="/admin/dashboard" element={<AnomalyOverview onLogout={handleLogout} />} />
+        
+        <Route path="/community/login" element={
+          <CommunityLogin
+            onLoginSuccess={handleCommunityLoginSuccess}
+            onNavigateToSignup={handleNavigateToCommunitySignup}
+          />
+        } />
 
-      {currentScreen === 'community-login' && (
-        <CommunityLogin
-          onLoginSuccess={handleCommunityLoginSuccess}
-          onNavigateToSignup={handleNavigateToCommunitySignup}
-        />
-      )}
+        <Route path="/community/signup" element={
+          <CommunitySignup
+            onSignupSuccess={handleCommunitySignupSuccess}
+            onNavigateToLogin={handleNavigateToCommunityLogin}
+          />
+        } />
 
-      {currentScreen === 'community-signup' && (
-        <CommunitySignup
-          onSignupSuccess={handleCommunitySignupSuccess}
-          onNavigateToLogin={handleNavigateToCommunityLogin}
-        />
-      )}
-
-      {currentScreen === 'community-dashboard' && <WaterSafetyOverview onLogout={handleCommunityLogout} />}
+        <Route path="/community" element={<WaterSafetyOverview onLogout={handleCommunityLogout} />} />
+        <Route path="/community/dashboard" element={<WaterSafetyOverview onLogout={handleCommunityLogout} />} />
+      </Routes>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   )
 }
 

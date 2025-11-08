@@ -3,11 +3,18 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import publicRoutes from './routes/public.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import { waterDataService } from './services/water-data.service.js';
 import { notificationMonitorService } from './services/notification-monitor.service.js';
+import { operatorDataService } from './services/operator-data.service.js';
 import { ErrorHandler } from './middleware/error-handler.middleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,9 +45,57 @@ app.use(ErrorHandler.handle);
 
 const updateInterval = parseInt(process.env.DATA_UPDATE_INTERVAL_MS || '60000', 10);
 waterDataService.startDataGeneration(updateInterval);
+operatorDataService.startDataGeneration(updateInterval);
 
 const enableDemoChecks = !!process.env.TRIGGER_CRITICAL_DELAY;
 notificationMonitorService.startMonitoring(updateInterval, enableDemoChecks);
+
+let mlServiceProcess: ReturnType<typeof spawn> | null = null;
+
+const startMLService = () => {
+  const mlServicePath = path.join(__dirname, 'services', 'ml-inference-service.py');
+  const mlServicePort = process.env.ML_SERVICE_PORT || '5000';
+  
+  process.env.ML_SERVICE_PORT = mlServicePort;
+  
+  mlServiceProcess = spawn('python3', [mlServicePath], {
+    cwd: path.join(__dirname, '..'),
+    stdio: 'inherit',
+  });
+  
+  mlServiceProcess.on('error', (error) => {
+    console.error('Failed to start ML inference service:', error);
+    console.log('ML service will not be available. Using fallback predictions.');
+  });
+  
+  mlServiceProcess.on('exit', (code) => {
+    if (code !== 0 && code !== null) {
+      console.error(`ML inference service exited with code ${code}`);
+      console.log('Attempting to restart ML service in 5 seconds...');
+      setTimeout(startMLService, 5000);
+    }
+  });
+  
+  console.log(`ML inference service starting on port ${mlServicePort}...`);
+};
+
+if (process.env.START_ML_SERVICE !== 'false') {
+  startMLService();
+}
+
+process.on('SIGTERM', () => {
+  if (mlServiceProcess) {
+    mlServiceProcess.kill();
+  }
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  if (mlServiceProcess) {
+    mlServiceProcess.kill();
+  }
+  process.exit(0);
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -6,7 +6,7 @@ export class NotificationMonitorService {
   private checkInterval: NodeJS.Timeout | null = null;
   private isMonitoring: boolean = false;
   private demoCheckCount: number = 0;
-  private demoChecksEnabled: boolean = false;
+  private criticalOnlyMode: boolean = false;
 
   startMonitoring(intervalMs: number = 60000, enableDemoChecks: boolean = false): void {
     if (this.isMonitoring) {
@@ -14,25 +14,25 @@ export class NotificationMonitorService {
     }
 
     this.isMonitoring = true;
-    this.demoChecksEnabled = enableDemoChecks;
     this.demoCheckCount = 0;
+    this.criticalOnlyMode = false;
 
     if (enableDemoChecks) {
       setTimeout(() => {
-        if (this.demoCheckCount < 3) {
-          this.checkAndNotify();
-        }
+        this.checkAndNotify(false);
       }, 20000);
 
       setTimeout(() => {
-        if (this.demoCheckCount < 3) {
-          this.checkAndNotify();
-        }
+        this.checkAndNotify(false);
       }, 40000);
+
+      setTimeout(() => {
+        this.criticalOnlyMode = true;
+      }, 6 * 60 * 60 * 1000);
     }
 
     this.checkInterval = setInterval(() => {
-      this.checkAndNotify();
+      this.checkAndNotify(this.criticalOnlyMode);
     }, intervalMs);
   }
 
@@ -42,16 +42,6 @@ export class NotificationMonitorService {
 
   incrementNotificationCount(): void {
     this.demoCheckCount++;
-    
-    if (this.demoCheckCount >= 3 && this.demoChecksEnabled) {
-      if (this.checkInterval) {
-        clearInterval(this.checkInterval);
-      }
-      
-      this.checkInterval = setInterval(() => {
-        this.checkAndNotify();
-      }, 3600000);
-    }
   }
 
   stopMonitoring(): void {
@@ -62,9 +52,14 @@ export class NotificationMonitorService {
     }
   }
 
-  private async checkAndNotify(): Promise<void> {
+  private async checkAndNotify(criticalOnly: boolean = false): Promise<void> {
     try {
       const riskIndex = waterDataService.getWaterRiskIndex();
+      
+      if (criticalOnly && riskIndex.level !== 'critical') {
+        return;
+      }
+      
       const notification = notificationsService.checkAndCreateNotification(riskIndex.level);
 
       if (notification) {

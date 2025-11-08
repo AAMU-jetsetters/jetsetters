@@ -62,26 +62,24 @@
   padding: 8px 20px;
   border-radius: 20px;
   display: inline-block;
+  background-color: transparent;
+  border: 1px solid #4a4a4a;
 }
 
 .risk-low {
-  background-color: #10b981;
-  color: #ffffff;
+  color: #10b981;
 }
 
 .risk-moderate {
-  background-color: #fbbf24;
-  color: #000000;
+  color: #fbbf24;
 }
 
 .risk-high {
-  background-color: #f97316;
-  color: #ffffff;
+  color: #f97316;
 }
 
 .risk-critical {
-  background-color: #ef4444;
-  color: #ffffff;
+  color: #ef4444;
 }
 
 .risk-description {

@@ -113,6 +113,43 @@
   margin-bottom: 8px;
 }
 
+.status-open {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.incident-active {
+  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.incident-active:hover {
+  background: 
+    linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent),
+    rgba(239, 68, 68, 0.1) !important;
+  border-left-color: #ef4444 !important;
+}
+
+.incident-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #a0a0a0;
+}
+
+.incident-empty p {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+}
+
+.incident-empty-subtitle {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  color: #666666;
+}
+
 .incident-description {
   font-family: 'Ubuntu', sans-serif;
   font-size: 13px;
