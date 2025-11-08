@@ -55,11 +55,32 @@ app.listen(PORT, () => {
     
     setTimeout(() => {
       waterDataService.forceCriticalState();
+    }, delaySeconds * 1000);
+    
+    setTimeout(() => {
+      waterDataService.forceStableState();
+    }, delaySeconds * 1000 + 15000);
+    
+    setTimeout(() => {
+      waterDataService.forceCriticalState();
       
       setTimeout(() => {
         waterDataService.forceStableState();
       }, 15000);
-    }, delaySeconds * 1000);
+    }, delaySeconds * 1000 + 40000);
+    
+    const checkNotificationCount = setInterval(() => {
+      const count = notificationMonitorService.getNotificationCount();
+      
+      if (count >= 3) {
+        clearInterval(checkNotificationCount);
+        waterDataService.stopDataGeneration();
+        
+        setTimeout(() => {
+          waterDataService.startDataGeneration(updateInterval);
+        }, 1800000);
+      }
+    }, 5000);
   }
 });
 

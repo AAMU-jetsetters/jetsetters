@@ -5,6 +5,7 @@ import { communityIssuesService } from '../services/community-issues.service.js'
 import { faqService } from '../services/faq.service.js';
 import { notificationsService } from '../services/notifications.service.js';
 import { userEmailsService } from '../services/user-emails.service.js';
+import { userPreferencesService } from '../services/user-preferences.service.js';
 import { ErrorHandler } from '../middleware/error-handler.middleware.js';
 
 const router = Router();
@@ -219,6 +220,17 @@ router.post('/register-email', ErrorHandler.asyncHandler(async (req: Request, re
 
   const userEmail = userEmailsService.upsertUserEmail(email, userId);
 
+  const existingPreferences = userPreferencesService.getPreferences(userId);
+  if (!existingPreferences) {
+    userPreferencesService.savePreferences(userId, email, {
+      waterQualityAlerts: true,
+      systemUpdates: true,
+      maintenanceNotices: false,
+      emailNotifications: true,
+      pushNotifications: true,
+    });
+  }
+
   res.json({
     success: true,
     data: userEmail,
@@ -331,6 +343,62 @@ router.delete('/notifications/:id', ErrorHandler.asyncHandler(async (req: Reques
   res.json({
     success: true,
     message: 'Notification deleted',
+  });
+}));
+
+router.get('/preferences', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.query.userId as string;
+
+  if (!userId) {
+    res.status(400).json({
+      success: false,
+      error: 'userId is required',
+    });
+    return;
+  }
+
+  const preferences = userPreferencesService.getPreferences(userId);
+
+  if (!preferences) {
+    res.json({
+      success: true,
+      data: null,
+      message: 'No preferences found. Using defaults.',
+    });
+    return;
+  }
+
+  res.json({
+    success: true,
+    data: preferences,
+  });
+}));
+
+router.put('/preferences', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const { userId, email, preferences } = req.body;
+
+  if (!userId || !email) {
+    res.status(400).json({
+      success: false,
+      error: 'userId and email are required',
+    });
+    return;
+  }
+
+  if (!preferences || typeof preferences !== 'object') {
+    res.status(400).json({
+      success: false,
+      error: 'preferences object is required',
+    });
+    return;
+  }
+
+  const savedPreferences = userPreferencesService.savePreferences(userId, email, preferences);
+
+  res.json({
+    success: true,
+    data: savedPreferences,
+    message: 'Preferences saved successfully',
   });
 }));
 

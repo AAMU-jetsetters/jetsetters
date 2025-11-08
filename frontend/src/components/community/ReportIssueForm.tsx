@@ -69,23 +69,23 @@ function ReportIssueForm({ onClose, onSubmit }: ReportIssueFormProps) {
 
       setSubmitSuccess(true);
 
-      if (onSubmit) {
-        onSubmit(formData);
-      }
+    if (onSubmit) {
+      onSubmit(formData);
+    }
 
       setTimeout(() => {
-        setFormData({
-          issueType: '',
-          description: '',
-          location: '',
-          priority: 'Medium',
-          contactEmail: '',
-          contactPhone: '',
-        });
+    setFormData({
+      issueType: '',
+      description: '',
+      location: '',
+      priority: 'Medium',
+      contactEmail: '',
+      contactPhone: '',
+    });
         setSubmitSuccess(false);
         setIsSubmitting(false);
-        if (onClose) {
-          onClose();
+    if (onClose) {
+      onClose();
         }
       }, 2000);
     } catch (error) {

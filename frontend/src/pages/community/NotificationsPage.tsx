@@ -31,9 +31,9 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
   const handleMarkAsRead = async (id: number) => {
     try {
       await notificationsApi.markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
-      );
+    setNotifications((prev) =>
+      prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
+    );
     } catch (err) {
     }
   };
@@ -41,11 +41,11 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsApi.markAllAsRead();
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, read: true }))
-      );
-      if (onMarkAllRead) {
-        onMarkAllRead();
+    setNotifications((prev) =>
+      prev.map((notif) => ({ ...notif, read: true }))
+    );
+    if (onMarkAllRead) {
+      onMarkAllRead();
       }
     } catch (err) {
     }
@@ -54,7 +54,7 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
   const handleDeleteNotification = async (id: number) => {
     try {
       await notificationsApi.deleteNotification(id);
-      setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     } catch (err) {
     }
   };
@@ -89,11 +89,11 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const getNotificationIcon = () => {
-    return (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-      </svg>
-    );
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+          </svg>
+        );
   };
 
   return (

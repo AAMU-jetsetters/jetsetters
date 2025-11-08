@@ -128,15 +128,15 @@ export class WaterDataService {
       
       let value: number;
       if (param === 'pH') {
-        value = 8.1;
+        value = 8.2;
       } else if (param === 'chlorine') {
-        value = 1.5;
+        value = 1.4;
       } else if (param === 'turbidity') {
-        value = 0.65;
+        value = 0.75;
       } else if (param === 'temperature') {
-        value = 22;
+        value = 20.5;
       } else {
-        value = 0.010;
+        value = 0.012;
       }
       
       return {
@@ -407,47 +407,48 @@ export class WaterDataService {
     const criticalChemicals: ChemicalReading[] = [
       {
         parameter: 'pH',
-        value: 12.5,
-        unit: 'pH units',
-        status: 'anomaly',
+        value: 9.0,
+        unit: '',
         timestamp: now,
-        note: 'Critical pH level',
       },
       {
         parameter: 'chlorine',
-        value: 4.2,
+        value: 1.3,
         unit: 'mg/L',
-        status: 'anomaly',
         timestamp: now,
-        note: 'Critical chlorine level',
       },
       {
         parameter: 'turbidity',
-        value: 9.5,
+        value: 1.8,
         unit: 'NTU',
-        status: 'anomaly',
         timestamp: now,
-        note: 'Critical turbidity level',
       },
       {
         parameter: 'temperature',
-        value: 35,
+        value: 23.5,
         unit: '°C',
-        status: 'anomaly',
         timestamp: now,
-        note: 'Critical temperature',
       },
       {
         parameter: 'lead',
-        value: 0.030,
+        value: 0.020,
         unit: 'mg/L',
-        status: 'anomaly',
         timestamp: now,
-        note: 'Critical lead level',
       },
-    ];
+    ].map((chem) => {
+      const range = this.NORMAL_RANGES[chem.parameter];
+      const roundedValue = this.roundToPrecision(chem.value, chem.parameter);
+      return {
+        parameter: chem.parameter,
+        value: roundedValue,
+        unit: range.unit,
+        status: this.determineParameterStatus(chem.parameter, roundedValue),
+        timestamp: now,
+      };
+    });
 
-    const riskIndex = this.calculateRiskIndex(criticalChemicals);
+    let riskIndex = this.calculateRiskIndex(criticalChemicals);
+    riskIndex = Math.min(90, Math.max(85, riskIndex));
     
     this.currentState = {
       timestamp: now,
@@ -457,7 +458,7 @@ export class WaterDataService {
         isActive: true,
         severity: 'critical',
         type: 'chemical',
-        affectedParameters: criticalChemicals.map((c) => c.parameter),
+        affectedParameters: criticalChemicals.filter((c) => c.status === 'anomaly').map((c) => c.parameter),
         startTime: now,
       },
     };

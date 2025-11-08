@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import type { Notification } from './notifications.service.js';
-import { userEmailsService } from './user-emails.service.js';
+import { userPreferencesService } from './user-preferences.service.js';
 
 interface EmailConfig {
   host?: string;
@@ -55,7 +55,7 @@ export class EmailService {
     }
 
     try {
-      const userEmails = userEmailsService.getAllUserEmails();
+      const userEmails = userPreferencesService.getUsersWithEmailEnabled();
 
       if (userEmails.length === 0) {
         return false;

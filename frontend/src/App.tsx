@@ -70,7 +70,7 @@ function App() {
       
       if (result.success && result.verificationId) {
         setVerificationId(result.verificationId)
-        setCurrentScreen('twofa-login')
+    setCurrentScreen('twofa-login')
       } else {
         console.error('Failed to send MFA code:', result.error)
         alert('Failed to send verification code. Please try again.')

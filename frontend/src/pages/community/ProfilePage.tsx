@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import { preferencesApi } from '../../services/preferencesApi';
+import { browserNotificationService } from '../../services/browserNotifications';
 import './ProfilePage.css';
 
 interface ProfilePageProps {
@@ -15,18 +17,92 @@ function ProfilePage({ onLogout }: ProfilePageProps) {
     pushNotifications: true,
   });
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
   const user = firebaseAuthService.getCurrentUser();
 
-  const handleToggle = (key: keyof typeof notifications) => {
+  useEffect(() => {
+    const loadPreferences = async () => {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const preferences = await preferencesApi.getPreferences(user.uid);
+        
+        if (preferences) {
+          setNotifications({
+            waterQualityAlerts: preferences.waterQualityAlerts,
+            systemUpdates: preferences.systemUpdates,
+            maintenanceNotices: preferences.maintenanceNotices,
+            emailNotifications: preferences.emailNotifications,
+            pushNotifications: preferences.pushNotifications,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load preferences:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPreferences();
+  }, [user?.uid]);
+
+  const handleToggle = async (key: keyof typeof notifications) => {
+    const newValue = !notifications[key];
+    
     setNotifications((prev) => ({
       ...prev,
-      [key]: !prev[key],
+      [key]: newValue,
     }));
+    setSaveMessage(null);
+
+    if (key === 'pushNotifications' && newValue) {
+      if (browserNotificationService.isSupported()) {
+        const permission = await browserNotificationService.requestPermission();
+        if (permission !== 'granted') {
+          setNotifications((prev) => ({
+            ...prev,
+            pushNotifications: false,
+          }));
+          setSaveMessage('Browser notification permission was denied. Please enable it in your browser settings.');
+          setTimeout(() => setSaveMessage(null), 5000);
+        }
+      } else {
+        setNotifications((prev) => ({
+          ...prev,
+          pushNotifications: false,
+        }));
+        setSaveMessage('Browser notifications are not supported in this browser.');
+        setTimeout(() => setSaveMessage(null), 5000);
+      }
+    }
   };
 
-  const handleSavePreferences = () => {
-    console.log('Saving notification preferences:', notifications);
-    alert('Notification preferences saved successfully!');
+  const handleSavePreferences = async () => {
+    if (!user?.uid || !user?.email) {
+      alert('User information not available. Please try logging in again.');
+      return;
+    }
+
+    setSaving(true);
+    setSaveMessage(null);
+
+    try {
+      await preferencesApi.savePreferences(user.uid, user.email, notifications);
+      setSaveMessage('Preferences saved successfully!');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+      setSaveMessage('Failed to save preferences. Please try again.');
+      setTimeout(() => setSaveMessage(null), 5000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogoutClick = async () => {
@@ -147,9 +223,18 @@ function ProfilePage({ onLogout }: ProfilePageProps) {
           </div>
         </div>
 
-        <button className="save-button" onClick={handleSavePreferences}>
-          Save Preferences
+        <button 
+          className="save-button" 
+          onClick={handleSavePreferences}
+          disabled={saving || loading}
+        >
+          {saving ? 'Saving...' : 'Save Preferences'}
         </button>
+        {saveMessage && (
+          <p className={saveMessage.includes('Failed') ? 'error-message' : 'success-message'}>
+            {saveMessage}
+          </p>
+        )}
       </div>
 
       <div className="profile-section">

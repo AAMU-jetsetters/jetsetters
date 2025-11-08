@@ -13,6 +13,7 @@ import { firebaseAuthService } from '../../services/firebaseAuth';
 import { notificationsApi } from '../../services/notificationsApi';
 import { useWaterData } from '../../hooks/useWaterData';
 import { useHistoricalData } from '../../hooks/useHistoricalData';
+import { useBrowserNotifications } from '../../hooks/useBrowserNotifications';
 import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
 import type { IssueData } from '../../components/community/ReportIssueForm';
 import './WaterSafetyOverview.css';
@@ -33,12 +34,27 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const { data: waterData, loading, error } = useWaterData();
   const { chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
 
+  useBrowserNotifications(true);
+
   useEffect(() => {
     const user = firebaseAuthService.getCurrentUser();
     if (user && user.email && user.uid) {
       notificationsApi.registerEmail(user.email, user.uid).catch(() => {
       });
     }
+  }, []);
+
+  useEffect(() => {
+    const handleNavigateToNotifications = () => {
+      setActiveTab('notifications');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('navigateToNotifications', handleNavigateToNotifications);
+
+    return () => {
+      window.removeEventListener('navigateToNotifications', handleNavigateToNotifications);
+    };
   }, []);
 
   useEffect(() => {
@@ -176,30 +192,30 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
                 </div>
               </div>
             ) : waterData ? (
-              <>
-                <StatusCard
+          <>
+            <StatusCard
                   riskLevel={mapRiskLevelToFrontend(waterData.overallRisk.level)}
                   description={waterData.overallRisk.description}
-                />
+            />
 
-                <div className="content-section">
-                  <HealthAdvisory
+            <div className="content-section">
+              <HealthAdvisory
                     advisory={waterData.healthAdvisory.message}
                     updatedAt={formatDate(waterData.healthAdvisory.updatedAt)}
-                    onViewDetails={handleViewDetails}
-                  />
-                </div>
+                onViewDetails={handleViewDetails}
+              />
+            </div>
 
-                <div className="content-section">
-                  <HistoricalTrends
-                    title="Water Quality Trend (pH Level)"
+            <div className="content-section">
+              <HistoricalTrends
+                title="Water Quality Trend (pH Level)"
                     data={pHTrendData}
                     timeRange={`${timeRange}days` as '7days' | '30days' | '90days'}
-                    unit="pH"
-                    variant="community"
+                unit="pH"
+                variant="community"
                     onTimeRangeChange={handleTimeRangeChange}
-                  />
-                </div>
+              />
+            </div>
               </>
             ) : null}
 
