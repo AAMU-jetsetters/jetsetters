@@ -1,3 +1,4 @@
+import sentraLogo from '../../assets/sentra_logo.png';
 import './AdminLandingPage.css';
 
 interface AdminLandingPageProps {
@@ -15,7 +16,7 @@ function AdminLandingPage({ onEnterAdmin }: AdminLandingPageProps) {
 
       <div className="landing-content">
         <header className="landing-header">
-          <img src="/src/assets/sentra_logo.png" alt="Sentra" className="landing-logo" />
+          <img src={sentraLogo} alt="Sentra" className="landing-logo" />
         </header>
 
         <main className="landing-main">

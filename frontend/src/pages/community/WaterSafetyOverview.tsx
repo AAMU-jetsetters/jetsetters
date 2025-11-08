@@ -18,6 +18,7 @@ import { useBrowserNotifications } from '../../hooks/useBrowserNotifications';
 import { useTour } from '../../hooks/useTour';
 import { tourSteps } from '../../config/tourSteps';
 import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
+import sentraIcon from '../../assets/sentra_icon.png';
 import '../../components/community/TourStyles.css';
 import './WaterSafetyOverview.css';
 
@@ -208,7 +209,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
       <header className="mobile-header">
         <div className="header-left">
           <div className="header-icon">
-            <img src="/src/assets/sentra_icon.png" alt="Sentra" className="header-logo" />
+            <img src={sentraIcon} alt="Sentra" className="header-logo" />
           </div>
           
           <nav className="header-nav" data-tour="nav-tabs">

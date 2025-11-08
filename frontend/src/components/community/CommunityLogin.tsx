@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import sentraLogo from '../../assets/sentra_logo.png';
 import './CommunityLogin.css';
 
 interface CommunityLoginProps {
@@ -55,7 +56,7 @@ function CommunityLogin({ onLoginSuccess, onNavigateToSignup }: CommunityLoginPr
     <div className="community-login-container">
       <div className="community-login-card">
         <div className="logo-section">
-          <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
+          <img src={sentraLogo} alt="Sentra" className="auth-logo" />
         </div>
 
         <h1 className="login-title">Welcome</h1>

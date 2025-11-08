@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import sentraLogo from '../../assets/sentra_logo.png';
 import './CommunitySignup.css';
 
 interface CommunitySignupProps {
@@ -68,7 +69,7 @@ function CommunitySignup({ onSignupSuccess, onNavigateToLogin }: CommunitySignup
     <div className="community-signup-container">
       <div className="community-signup-card">
         <div className="logo-section">
-          <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
+          <img src={sentraLogo} alt="Sentra" className="auth-logo" />
         </div>
 
         <h1 className="signup-title">Create Account</h1>
