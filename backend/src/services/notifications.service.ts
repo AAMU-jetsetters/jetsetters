@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { mkdirSync } from 'fs';
 import type { OverallRiskLevel } from '../types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +24,8 @@ export class NotificationsService {
 
   constructor() {
     const dbPath = path.join(__dirname, '../../data/notifications.db');
+    const dbDir = path.dirname(dbPath);
+    mkdirSync(dbDir, { recursive: true });
     this.db = new Database(dbPath);
     this.initializeDatabase();
   }

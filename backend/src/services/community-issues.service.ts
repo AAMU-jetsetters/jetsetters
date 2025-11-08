@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { mkdirSync } from 'fs';
 import { CommunityIssue, IssueStatus, SubmitIssueRequest } from '../types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +12,8 @@ export class CommunityIssuesService {
 
   constructor() {
     const dbPath = path.join(__dirname, '../../data/issues.db');
+    const dbDir = path.dirname(dbPath);
+    mkdirSync(dbDir, { recursive: true });
     this.db = new Database(dbPath);
     this.initializeDatabase();
   }
