@@ -15,7 +15,7 @@ type Screen = 'login' | 'signup' | 'twofa-signup' | 'twofa-login' | 'success' | 
 type FlowType = 'signup' | 'login';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('community-login')
+  const [currentScreen, setCurrentScreen] = useState<Screen>('admin-dashboard')
   const [currentEmail, setCurrentEmail] = useState<string>('')
   const [flowType, setFlowType] = useState<FlowType>('login')
   const [verificationId, setVerificationId] = useState<string>('')

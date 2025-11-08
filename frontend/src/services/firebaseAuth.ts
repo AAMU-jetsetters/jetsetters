@@ -8,7 +8,6 @@ import {
 import type { User, UserCredential } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-// Initialize providers
 const googleProvider = new GoogleAuthProvider();
 
 export interface AuthResult {
@@ -18,7 +17,6 @@ export interface AuthResult {
 }
 
 export const firebaseAuthService = {
-  // Email/Password signup
   signupWithEmail: async (
     email: string,
     password: string
@@ -37,7 +35,6 @@ export const firebaseAuthService = {
     }
   },
 
-  // Email/Password login
   loginWithEmail: async (
     email: string,
     password: string
@@ -56,7 +53,6 @@ export const firebaseAuthService = {
     }
   },
 
-  // Google Sign-In
   signInWithGoogle: async (): Promise<AuthResult> => {
     try {
       const result: UserCredential = await signInWithPopup(auth, googleProvider);
@@ -68,7 +64,6 @@ export const firebaseAuthService = {
     }
   },
 
-  // Sign out
   logout: async (): Promise<AuthResult> => {
     try {
       await signOut(auth);
@@ -80,12 +75,10 @@ export const firebaseAuthService = {
     }
   },
 
-  // Get current user
   getCurrentUser: (): User | null => {
     return auth.currentUser;
   },
 
-  // Check if user is authenticated
   isAuthenticated: (): boolean => {
     return auth.currentUser !== null;
   },

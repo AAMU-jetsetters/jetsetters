@@ -8,6 +8,7 @@ import IncidentList from '../../components/admin/IncidentList';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
 import DiagnosticsForensics from './DiagnosticsForensics';
 import AIAnalystChat from './AIAnalystChat';
+import CommunityReports from './CommunityReports';
 import './AnomalyOverview.css';
 
 interface AnomalyOverviewProps {
@@ -66,6 +67,8 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
         return 'Diagnostics & Forensics';
       case 'ai-chat':
         return 'AI Analyst & Chat';
+      case 'community-reports':
+        return 'Community Reports';
       default:
         return 'Anomaly Overview';
     }
@@ -144,6 +147,8 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
           {activeNav === 'diagnostics' && <DiagnosticsForensics />}
 
           {activeNav === 'ai-chat' && <AIAnalystChat />}
+
+          {activeNav === 'community-reports' && <CommunityReports />}
         </main>
 
         <footer className="admin-footer">
