@@ -13,6 +13,7 @@ function Sidebar({ activeItem, onNavigate }: SidebarProps) {
     { id: 'anomaly-overview', label: 'Anomaly Overview', icon: '' },
     { id: 'diagnostics', label: 'Diagnostics & Forensics', icon: '' },
     { id: 'ai-chat', label: 'AI Analyst & Chat', icon: '' },
+    { id: 'community-reports', label: 'Community Reports', icon: '' },
   ];
 
   return (

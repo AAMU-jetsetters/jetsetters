@@ -24,7 +24,7 @@ function ChartWidget({ title = 'Multi-Series Sensor Data with Anomaly Score', sh
             </div>
           </div>
           <div className="chart-content">
-            {/* Placeholder for actual chart implementation */}
+            {/* Placeholder for chart implementation */}
             <div className="chart-visual">
               <svg width="100%" height="100%" viewBox="0 0 600 200">
                 {/* Grid lines */}

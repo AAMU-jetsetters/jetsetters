@@ -49,7 +49,7 @@ function LogViewer({ logs: initialLogs }: LogViewerProps) {
 
   const handleApplyFilters = () => {
     console.log('Filters applied:', { componentFilter, timeWindow });
-    // Filter logic would go here
+    // Filter logic here
   };
 
   return (
