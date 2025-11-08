@@ -22,6 +22,7 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:5175',
   'http://localhost:5173',
+  'https://jetsetters-frontend.onrender.com',
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
