@@ -24,6 +24,7 @@ def load_model():
             script_path.parent.parent.parent / 'models',
             Path.cwd().parent / 'models',
             Path.cwd() / 'models',
+            Path('/opt/render/project/src/models'),
             Path('/app/models'),
         ]
         
