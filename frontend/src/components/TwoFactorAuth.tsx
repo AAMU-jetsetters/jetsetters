@@ -16,11 +16,11 @@ interface TwoFactorAuthProps {
 }
 
 function TwoFactorAuth({ 
-  email: _email, 
+  email: _email, // Required prop but not used in component
   flowType, 
   verificationId: initialVerificationId, 
   resolver, 
-  userId: _userId,
+  userId: _userId, // Required prop but not used in component
   onVerifySuccess, 
   onResendCode 
 }: TwoFactorAuthProps) {
@@ -132,7 +132,6 @@ function TwoFactorAuth({
     }
 
     setSuccess(flowType === 'signup' ? 'Account verified successfully!' : 'Login successful!');
-    console.log('MFA verification successful');
     
     // Delay to show success message
     setTimeout(() => {
@@ -161,7 +160,6 @@ function TwoFactorAuth({
       if (result.success && result.verificationId) {
         setVerificationId(result.verificationId);
         setSuccess('New code sent to your phone!');
-        console.log('New MFA code sent');
       } else {
         setError(result.error || 'Failed to resend code.');
       }

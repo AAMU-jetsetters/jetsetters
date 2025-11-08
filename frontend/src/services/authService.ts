@@ -69,8 +69,6 @@ export const authService = {
 
     twoFactorCodes.push({ email, code, expiresAt });
 
-    console.log(`2FA Code for ${email}: ${code}`);
-    console.log(`Code sent to phone: ${phoneNumber}`);
 
     const pendingUser: User = {
       id: (users.length + 1).toString(),
@@ -113,7 +111,6 @@ export const authService = {
       users.push(pendingUser);
       sessionStorage.removeItem('pendingUser');
 
-      console.log('User registered successfully:', pendingUser.email);
     }
 
     twoFactorCodes.splice(codeIndex, 1);
@@ -145,8 +142,6 @@ export const authService = {
 
     twoFactorCodes.push({ email: user.email, code, expiresAt });
 
-    console.log(`2FA Login Code for ${user.email}: ${code}`);
-    console.log(`Code sent to phone: ${user.phoneNumber}`);
 
     return {
       success: true,
@@ -174,7 +169,6 @@ export const authService = {
 
     twoFactorCodes.splice(codeIndex, 1);
 
-    console.log('Login successful for:', email);
 
     return { success: true, message: 'Login successful' };
   },
@@ -190,7 +184,6 @@ export const authService = {
 
     twoFactorCodes.push({ email, code, expiresAt });
 
-    console.log(`New 2FA Code for ${email}: ${code}`);
 
     return {
       success: true,

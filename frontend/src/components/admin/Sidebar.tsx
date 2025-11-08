@@ -17,7 +17,7 @@ function Sidebar({ activeItem, onNavigate }: SidebarProps) {
   ];
 
   return (
-    <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`} data-tour="sidebar">
       <button 
         className="sidebar-toggle"
         onClick={() => setIsCollapsed(!isCollapsed)}

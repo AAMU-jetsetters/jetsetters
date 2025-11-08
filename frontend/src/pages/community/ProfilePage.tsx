@@ -6,9 +6,10 @@ import './ProfilePage.css';
 
 interface ProfilePageProps {
   onLogout: () => void;
+  onStartTour?: () => void;
 }
 
-function ProfilePage({ onLogout }: ProfilePageProps) {
+function ProfilePage({ onLogout, onStartTour }: ProfilePageProps) {
   const [notifications, setNotifications] = useState({
     waterQualityAlerts: true,
     systemUpdates: true,
@@ -234,6 +235,48 @@ function ProfilePage({ onLogout }: ProfilePageProps) {
           <p className={saveMessage.includes('Failed') ? 'error-message' : 'success-message'}>
             {saveMessage}
           </p>
+        )}
+      </div>
+
+      <div className="profile-section">
+        <h3 className="section-title">Help & Support</h3>
+        <p className="section-description">
+          Learn how to use the dashboard and access help resources
+        </p>
+        {onStartTour && (
+          <button 
+            className="tour-button" 
+            onClick={onStartTour}
+            style={{
+              width: '100%',
+              padding: '12px 24px',
+              marginBottom: '16px',
+              background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(157, 78, 221, 0.2))',
+              border: '1px solid rgba(0, 212, 255, 0.4)',
+              borderRadius: '10px',
+              color: '#00d4ff',
+              fontFamily: 'Ubuntu, sans-serif',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(157, 78, 221, 0.3))';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(157, 78, 221, 0.2))';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+            Take Dashboard Tour
+          </button>
         )}
       </div>
 

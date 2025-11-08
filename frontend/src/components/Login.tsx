@@ -35,7 +35,6 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
     if (!result.success) {
       if (result.requiresMFA && result.resolver) {
         // MFA is required, proceed to 2FA screen
-        console.log('MFA required for user');
         if (onLoginSuccess) {
           onLoginSuccess(email, result.resolver);
         }
@@ -46,7 +45,6 @@ function Login({ onLoginSuccess, onNavigateToSignup }: LoginProps) {
     }
 
     // No MFA enrolled, login successful
-    console.log('Login successful (no MFA enrolled)');
     if (onLoginSuccess && result.user) {
       onLoginSuccess(result.user.email || email);
     }

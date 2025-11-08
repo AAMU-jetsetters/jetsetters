@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import Joyride, { type CallBackProps, STATUS } from 'react-joyride';
 import StatusCard from '../../components/community/StatusCard';
 import HealthAdvisory from '../../components/community/HealthAdvisory';
 import CommunityActions from '../../components/community/CommunityActions';
@@ -14,8 +15,10 @@ import { notificationsApi } from '../../services/notificationsApi';
 import { useWaterData } from '../../hooks/useWaterData';
 import { useHistoricalData } from '../../hooks/useHistoricalData';
 import { useBrowserNotifications } from '../../hooks/useBrowserNotifications';
+import { useTour } from '../../hooks/useTour';
+import { tourSteps } from '../../config/tourSteps';
 import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
-import type { IssueData } from '../../components/community/ReportIssueForm';
+import '../../components/community/TourStyles.css';
 import './WaterSafetyOverview.css';
 
 interface WaterSafetyOverviewProps {
@@ -33,6 +36,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
 
   const { data: waterData, loading, error } = useWaterData();
   const { chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
+  const { run, stopTour, startTour } = useTour();
 
   useBrowserNotifications(true);
 
@@ -62,7 +66,8 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
       try {
         const count = await notificationsApi.getUnreadCount();
         setHasNotification(count > 0);
-      } catch (err) {
+      } catch {
+        // Silently handle errors
       }
     };
 
@@ -111,7 +116,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
     setShowReportForm(false);
   };
 
-  const handleSubmitIssue = (_issue: IssueData) => {
+  const handleSubmitIssue = () => {
     setShowReportForm(false);
   };
 
@@ -158,15 +163,55 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
     setHasNotification(false);
   };
 
+  const handleTourCallback = (data: CallBackProps) => {
+    const { status } = data;
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      stopTour();
+    }
+  };
+
+  const handleStartTour = () => {
+    if (activeTab !== 'home') {
+      setActiveTab('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        startTour();
+      }, 300);
+    } else {
+      startTour();
+    }
+  };
+
   return (
     <div className="water-safety-page">
+      <Joyride
+        steps={tourSteps}
+        run={run}
+        continuous={true}
+        showProgress={true}
+        showSkipButton={true}
+        callback={handleTourCallback}
+        styles={{
+          options: {
+            primaryColor: '#00d4ff',
+            zIndex: 10000,
+          },
+        }}
+        locale={{
+          back: 'Back',
+          close: 'Close',
+          last: 'Finish',
+          next: 'Next',
+          skip: 'Skip Tour',
+        }}
+      />
       <header className="mobile-header">
         <div className="header-left">
           <div className="header-icon">
             <img src="/src/assets/sentra_icon.png" alt="Sentra" className="header-logo" />
           </div>
           
-          <nav className="header-nav">
+          <nav className="header-nav" data-tour="nav-tabs">
             <button
               className={`header-nav-item ${activeTab === 'home' ? 'active' : ''}`}
               onClick={() => handleNavigate('home')}
@@ -199,7 +244,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
           </nav>
         </div>
 
-        <button className="notification-bell" onClick={handleNotificationClick}>
+        <button className="notification-bell" onClick={handleNotificationClick} data-tour="notifications">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -271,7 +316,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
 
         {activeTab === 'notifications' && <NotificationsPage onMarkAllRead={handleMarkAllRead} />}
 
-        {activeTab === 'profile' && <ProfilePage onLogout={handleLogoutClick} />}
+        {activeTab === 'profile' && <ProfilePage onLogout={handleLogoutClick} onStartTour={handleStartTour} />}
       </main>
 
       <BottomNav activeTab={activeTab} onNavigate={handleNavigate} />

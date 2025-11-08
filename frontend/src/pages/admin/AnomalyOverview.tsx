@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Joyride, { type CallBackProps, STATUS } from 'react-joyride';
 import AdminHeader from '../../components/admin/AdminHeader';
 import Sidebar from '../../components/admin/Sidebar';
 import DataCard from '../../components/admin/DataCard';
@@ -13,6 +14,9 @@ import { useAnomalyData } from '../../hooks/useAnomalyData';
 import { useSystemMetrics } from '../../hooks/useSystemMetrics';
 import { useAlerts } from '../../hooks/useAlerts';
 import { useIncidents } from '../../hooks/useIncidents';
+import { useAdminTour } from '../../hooks/useAdminTour';
+import { adminTourSteps } from '../../config/adminTourSteps';
+import '../../components/community/TourStyles.css';
 import './AnomalyOverview.css';
 
 interface AnomalyOverviewProps {
@@ -28,6 +32,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
   const { systemStatus, networkHealth } = useSystemMetrics(60000);
   const { alerts, loading: alertsLoading } = useAlerts(60000);
   const { incidents, loading: incidentsLoading } = useIncidents(60000);
+  const { run, stopTour, startTour } = useAdminTour();
 
   const handleTimeRangeChange = (range: '7days' | '30days' | '90days') => {
     const daysMap: Record<'7days' | '30days' | '90days', 7 | 30 | 90> = { '7days': 7, '30days': 30, '90days': 90 };
@@ -59,18 +64,46 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
     }
   };
 
+  const handleTourCallback = (data: CallBackProps) => {
+    const { status } = data;
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      stopTour();
+    }
+  };
+
   return (
     <div className="admin-layout">
+      <Joyride
+        steps={adminTourSteps}
+        run={run}
+        continuous={true}
+        showProgress={true}
+        showSkipButton={true}
+        callback={handleTourCallback}
+        styles={{
+          options: {
+            primaryColor: '#00d4ff',
+            zIndex: 10000,
+          },
+        }}
+        locale={{
+          back: 'Back',
+          close: 'Close',
+          last: 'Finish',
+          next: 'Next',
+          skip: 'Skip Tour',
+        }}
+      />
       <Sidebar activeItem={activeNav} onNavigate={setActiveNav} />
       
       <div className="admin-main">
-        <AdminHeader pageTitle={getPageTitle()} onLogout={onLogout} />
+        <AdminHeader pageTitle={getPageTitle()} onLogout={onLogout} onStartTour={startTour} />
         
         <main className="admin-content">
           {activeNav === 'anomaly-overview' && (
             <>
               {/* Data Cards Row */}
-              <section className="data-cards-section">
+              <section className="data-cards-section" data-tour="data-cards">
                 {anomalyCurrent && systemStatus ? (
                   <>
                     <DataCard
@@ -108,14 +141,14 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
 
               {/* Alerts and Network Health Row */}
               <section className="alerts-network-section">
-                <div className="alerts-column">
+                <div className="alerts-column" data-tour="alerts">
                   {alertsLoading ? (
                     <div>Loading alerts...</div>
                   ) : (
                     <AlertList alerts={alerts} />
                   )}
                 </div>
-                <div className="network-column">
+                <div className="network-column" data-tour="network-health">
                   {networkHealth ? (
                     <NetworkHealth
                       status={networkHealth.status}
@@ -129,7 +162,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
               </section>
 
               {/* Historical Trends Section */}
-              <section className="trends-section">
+              <section className="trends-section" data-tour="anomaly-trend">
                 {anomalyLoading ? (
                   <div>Loading anomaly trends...</div>
                 ) : (
@@ -145,7 +178,7 @@ function AnomalyOverview({ onLogout }: AnomalyOverviewProps) {
               </section>
 
               {/* Recent Incidents Section */}
-              <section className="incidents-section">
+              <section className="incidents-section" data-tour="incidents">
                 {incidentsLoading ? (
                   <div>Loading incidents...</div>
                 ) : (

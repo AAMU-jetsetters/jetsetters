@@ -62,8 +62,6 @@ function AppContent() {
     setMfaResolver(resolver)
     
     if (resolver) {
-      console.log('Sending MFA verification code...')
-      
       const result = await import('./services/adminFirebaseAuth').then(module => 
         module.adminFirebaseAuth.sendMFAVerification(resolver, 'recaptcha-container-mfa-login', 0)
       );
@@ -72,7 +70,6 @@ function AppContent() {
         setVerificationId(result.verificationId)
         navigate('/admin/twofa-login')
       } else {
-        console.error('Failed to send MFA code:', result.error)
         alert('Failed to send verification code. Please try again.')
       }
     } else {
@@ -82,14 +79,12 @@ function AppContent() {
 
   const handleVerifySuccess = () => {
     if (flowType === 'signup') {
-      console.log('Signup completed! Redirecting to login...')
       setTimeout(() => {
         navigate('/admin/login')
         setCurrentEmail('')
         alert('Account created successfully! Please log in.')
       }, 500)
     } else {
-      console.log('Login successful! Welcome to Sentra!')
       navigate('/admin/dashboard')
     }
   }
@@ -107,16 +102,13 @@ function AppContent() {
   const handleLogout = () => {
     navigate('/admin')
     setCurrentEmail('')
-    console.log('User logged out')
   }
 
   const handleCommunityLoginSuccess = () => {
-    console.log('Community user logged in successfully')
     navigate('/community')
   }
 
   const handleCommunitySignupSuccess = () => {
-    console.log('Community user signed up successfully')
     navigate('/community')
   }
 
@@ -132,7 +124,6 @@ function AppContent() {
 
   const handleCommunityLogout = () => {
     navigate('/community/login')
-    console.log('Community user logged out')
   }
 
   const handleEnterAdmin = () => {

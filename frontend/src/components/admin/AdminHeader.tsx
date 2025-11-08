@@ -5,9 +5,10 @@ import './AdminHeader.css';
 interface AdminHeaderProps {
   pageTitle: string;
   onLogout: () => void;
+  onStartTour?: () => void;
 }
 
-function AdminHeader({ pageTitle, onLogout }: AdminHeaderProps) {
+function AdminHeader({ pageTitle, onLogout, onStartTour }: AdminHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +56,11 @@ function AdminHeader({ pageTitle, onLogout }: AdminHeaderProps) {
           
           {isDropdownOpen && (
             <div className="profile-dropdown">
+              {onStartTour && (
+                <button className="dropdown-item" onClick={() => { setIsDropdownOpen(false); onStartTour(); }}>
+                  Take Dashboard Tour
+                </button>
+              )}
               <button className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                 Settings
               </button>
