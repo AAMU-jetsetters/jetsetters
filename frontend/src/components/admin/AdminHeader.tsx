@@ -32,7 +32,6 @@ function AdminHeader({ pageTitle, onLogout }: AdminHeaderProps) {
       <div className="admin-header-content">
         <div className="admin-header-left">
           <Logo size="medium" showText={false} />
-          <span className="admin-dashboard-label">Operator Dashboard</span>
         </div>
         <h1 className="admin-page-title">{pageTitle}</h1>
         <div className="admin-header-right" ref={dropdownRef}>
