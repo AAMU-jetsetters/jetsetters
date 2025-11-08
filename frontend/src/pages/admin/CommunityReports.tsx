@@ -1,91 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { issuesApi } from '../../services/issuesApi';
+import { mapBackendIssueToReport, mapFrontendStatusToBackend, type Report } from '../../utils/issuesMapper';
 import './CommunityReports.css';
 
-interface Report {
-  id: string;
-  reportedBy: string;
-  email: string;
-  issueType: string;
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  location: string;
-  description: string;
-  dateReported: string;
-  status: 'New' | 'In Review' | 'Resolved' | 'Closed';
-}
-
 function CommunityReports() {
-  const mockReports: Report[] = [
-    {
-      id: 'RPT-001',
-      reportedBy: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      issueType: 'Water Quality',
-      priority: 'High',
-      location: 'North District, Sector 4',
-      description: 'Strange odor and discoloration in tap water. Started noticing this yesterday evening. Water appears slightly brown and has a metallic smell.',
-      dateReported: '2025-11-08 09:15 AM',
-      status: 'New',
-    },
-    {
-      id: 'RPT-002',
-      reportedBy: 'Michael Chen',
-      email: 'mchen@email.com',
-      issueType: 'Taste Issue',
-      priority: 'Medium',
-      location: 'South District, Sector 2',
-      description: 'Water has an unusual chlorine taste. Much stronger than normal. Family members are complaining about the taste.',
-      dateReported: '2025-11-08 08:42 AM',
-      status: 'In Review',
-    },
-    {
-      id: 'RPT-003',
-      reportedBy: 'Emily Rodriguez',
-      email: 'emily.r@email.com',
-      issueType: 'Low Pressure',
-      priority: 'Low',
-      location: 'East District, Sector 7',
-      description: 'Water pressure has been very low for the past 3 days. Difficult to shower and run appliances.',
-      dateReported: '2025-11-07 04:30 PM',
-      status: 'In Review',
-    },
-    {
-      id: 'RPT-004',
-      reportedBy: 'James Williams',
-      email: 'jwilliams@email.com',
-      issueType: 'Water Quality',
-      priority: 'Critical',
-      location: 'West District, Sector 1',
-      description: 'Multiple residents reporting illness after drinking tap water. Urgent investigation needed. At least 5 households affected.',
-      dateReported: '2025-11-07 02:15 PM',
-      status: 'New',
-    },
-    {
-      id: 'RPT-005',
-      reportedBy: 'Lisa Anderson',
-      email: 'anderson.l@email.com',
-      issueType: 'Sediment',
-      priority: 'Medium',
-      location: 'North District, Sector 3',
-      description: 'Visible particles in water. Seems to be sediment or rust. Water filter getting clogged quickly.',
-      dateReported: '2025-11-07 11:20 AM',
-      status: 'Resolved',
-    },
-    {
-      id: 'RPT-006',
-      reportedBy: 'David Park',
-      email: 'dpark@email.com',
-      issueType: 'Temperature',
-      priority: 'Low',
-      location: 'Central District, Sector 5',
-      description: 'Cold water is warmer than usual. Suspect issue with water main insulation.',
-      dateReported: '2025-11-06 03:45 PM',
-      status: 'Closed',
-    },
-  ];
-
-  const [reports, setReports] = useState<Report[]>(mockReports);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [filterPriority, setFilterPriority] = useState<string>('All');
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const backendStatus = filterStatus !== 'All' 
+        ? (filterStatus === 'New' ? 'new' : filterStatus === 'In Review' ? 'acknowledged' : 'resolved')
+        : undefined;
+      const backendPriority = filterPriority !== 'All' && filterPriority !== 'Critical'
+        ? filterPriority
+        : filterPriority === 'Critical' ? 'Urgent' : undefined;
+
+      const issues = await issuesApi.getAllIssues(backendStatus, backendPriority);
+      const mappedReports = issues.map(mapBackendIssueToReport);
+      setReports(mappedReports);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load reports');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, [filterStatus, filterPriority]);
 
   const filteredReports = reports.filter((report) => {
     if (filterStatus !== 'All' && report.status !== filterStatus) return false;
@@ -94,14 +46,71 @@ function CommunityReports() {
   });
 
   const handleDownloadPDF = () => {
-    console.log('Download PDF functionality - To be implemented');
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Community Reports - ${new Date().toLocaleDateString()}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .priority-high { color: #d32f2f; }
+            .priority-medium { color: #f57c00; }
+            .priority-low { color: #388e3c; }
+          </style>
+        </head>
+        <body>
+          <h1>Community Reports</h1>
+          <p>Generated: ${new Date().toLocaleString()}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Issue Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Date Reported</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${reports.map(report => `
+                <tr>
+                  <td>${report.id}</td>
+                  <td>${report.issueType}</td>
+                  <td class="priority-${report.priority.toLowerCase()}">${report.priority}</td>
+                  <td>${report.status}</td>
+                  <td>${report.location}</td>
+                  <td>${report.dateReported}</td>
+                  <td>${report.description}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.print();
   };
 
-  const handleMarkAsClosed = (reportId: string) => {
-    setReports(reports.map(report => 
-      report.id === reportId ? { ...report, status: 'Closed' as const } : report
-    ));
-    console.log(`Report ${reportId} marked as closed`);
+  const handleMarkAsClosed = async (report: Report) => {
+    try {
+      const backendStatus = mapFrontendStatusToBackend('Resolved');
+      await issuesApi.updateIssueStatus(report.backendId, backendStatus);
+      await fetchReports();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update report status');
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -133,6 +142,27 @@ function CommunityReports() {
         return '';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="reports-page">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>Loading reports...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="reports-page">
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#d32f2f' }}>
+          Error: {error}
+          <button onClick={fetchReports} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="reports-page">
@@ -175,8 +205,9 @@ function CommunityReports() {
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
                   <option value="All">All</option>
+                  <option value="New">New</option>
                   <option value="In Review">In Review</option>
-                  <option value="Closed">Closed</option>
+                  <option value="Resolved">Resolved</option>
                 </select>
               </div>
               
@@ -256,13 +287,13 @@ function CommunityReports() {
                       </div>
                     </div>
                     
-                    {report.status !== 'Closed' && (
+                    {report.status !== 'Resolved' && report.status !== 'Closed' && (
                       <div className="report-actions">
                         <button 
                           className="action-btn close-btn"
-                          onClick={() => handleMarkAsClosed(report.id)}
+                          onClick={() => handleMarkAsClosed(report)}
                         >
-                          Mark as Closed
+                          Mark as Resolved
                         </button>
                       </div>
                     )}

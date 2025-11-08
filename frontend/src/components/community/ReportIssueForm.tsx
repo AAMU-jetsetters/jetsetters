@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { issuesApi } from '../../services/issuesApi';
 import './ReportIssueForm.css';
 
 interface ReportIssueFormProps {
@@ -26,6 +27,7 @@ function ReportIssueForm({ onClose, onSubmit }: ReportIssueFormProps) {
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const issueTypes = [
     'Water Quality Concern',
@@ -53,30 +55,42 @@ function ReportIssueForm({ onClose, onSubmit }: ReportIssueFormProps) {
     }
 
     setIsSubmitting(true);
+    setErrors([]);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await issuesApi.submitIssue({
+        issueType: formData.issueType,
+        description: formData.description,
+        location: formData.location,
+        priority: formData.priority,
+        contactEmail: formData.contactEmail || undefined,
+        contactPhone: formData.contactPhone || undefined,
+      });
 
-    console.log('Issue submitted:', formData);
+      setSubmitSuccess(true);
 
-    if (onSubmit) {
-      onSubmit(formData);
-    }
+      if (onSubmit) {
+        onSubmit(formData);
+      }
 
-    setIsSubmitting(false);
-
-    // Reset form
-    setFormData({
-      issueType: '',
-      description: '',
-      location: '',
-      priority: 'Medium',
-      contactEmail: '',
-      contactPhone: '',
-    });
-
-    if (onClose) {
-      onClose();
+      setTimeout(() => {
+        setFormData({
+          issueType: '',
+          description: '',
+          location: '',
+          priority: 'Medium',
+          contactEmail: '',
+          contactPhone: '',
+        });
+        setSubmitSuccess(false);
+        setIsSubmitting(false);
+        if (onClose) {
+          onClose();
+        }
+      }, 2000);
+    } catch (error) {
+      setIsSubmitting(false);
+      setErrors([error instanceof Error ? error.message : 'Failed to submit issue. Please try again.']);
     }
   };
 
@@ -93,6 +107,18 @@ function ReportIssueForm({ onClose, onSubmit }: ReportIssueFormProps) {
             </svg>
           </button>
         </div>
+
+        {submitSuccess && (
+          <div className="success-message" style={{ 
+            padding: '1rem', 
+            backgroundColor: '#d4edda', 
+            color: '#155724', 
+            borderRadius: '4px',
+            marginBottom: '1rem'
+          }}>
+            ✓ Issue submitted successfully! Thank you for your report.
+          </div>
+        )}
 
         {errors.length > 0 && (
           <div className="error-messages">

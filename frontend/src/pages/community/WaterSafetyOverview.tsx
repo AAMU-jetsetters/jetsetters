@@ -4,15 +4,16 @@ import HealthAdvisory from '../../components/community/HealthAdvisory';
 import CommunityActions from '../../components/community/CommunityActions';
 import BottomNav from '../../components/community/BottomNav';
 import ReportIssueForm from '../../components/community/ReportIssueForm';
+import FAQModal from '../../components/community/FAQModal';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
 import MetricsPage from './MetricsPage';
 import ProfilePage from './ProfilePage';
 import NotificationsPage from './NotificationsPage';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import { notificationsApi } from '../../services/notificationsApi';
 import { useWaterData } from '../../hooks/useWaterData';
 import { useHistoricalData } from '../../hooks/useHistoricalData';
 import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
-import type { IssueData } from '../../components/community/ReportIssueForm';
 import './WaterSafetyOverview.css';
 
 interface WaterSafetyOverviewProps {
@@ -22,13 +23,38 @@ interface WaterSafetyOverviewProps {
 function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'metrics' | 'profile' | 'notifications'>('home');
   const [showReportForm, setShowReportForm] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
   const [timeRange, setTimeRange] = useState<7 | 30 | 90>(7);
   const scrollPositionRef = useRef<number>(0);
   const isChangingRangeRef = useRef<boolean>(false);
-  const [hasNotification, setHasNotification] = useState(true);
+  const [hasNotification, setHasNotification] = useState(false);
 
   const { data: waterData, loading, error } = useWaterData();
   const { chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
+
+  useEffect(() => {
+    const user = firebaseAuthService.getCurrentUser();
+    if (user && user.email && user.uid) {
+      notificationsApi.registerEmail(user.email, user.uid).catch(() => {
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const count = await notificationsApi.getUnreadCount();
+        setHasNotification(count > 0);
+      } catch {
+        console.error('Failed to fetch unread count');
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const pHTrendData = useMemo(() => 
     chemicalTrends.pH?.map((point) => ({
@@ -71,20 +97,21 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
     setShowReportForm(false);
   };
 
-  const handleSubmitIssue = (issue: IssueData) => {
-    console.log('Issue submitted:', issue);
-    alert('Thank you! Your report has been submitted successfully.');
+  const handleSubmitIssue = () => {
     setShowReportForm(false);
   };
 
   const handleViewFAQ = () => {
-    console.log('View FAQ');
+    setShowFAQ(true);
+  };
+
+  const handleCloseFAQ = () => {
+    setShowFAQ(false);
   };
 
   const handleNavigate = (tab: 'home' | 'metrics' | 'profile' | 'notifications') => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    console.log('Navigate to:', tab);
   };
 
   const handleTimeRangeChange = (range: '7days' | '30days' | '90days') => {
@@ -223,6 +250,8 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
         {showReportForm && (
           <ReportIssueForm onClose={handleCloseReportForm} onSubmit={handleSubmitIssue} />
         )}
+
+        {showFAQ && <FAQModal onClose={handleCloseFAQ} />}
 
         {activeTab === 'metrics' && <MetricsPage />}
 
