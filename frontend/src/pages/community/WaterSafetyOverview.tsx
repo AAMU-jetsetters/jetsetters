@@ -4,6 +4,7 @@ import HealthAdvisory from '../../components/community/HealthAdvisory';
 import CommunityActions from '../../components/community/CommunityActions';
 import BottomNav from '../../components/community/BottomNav';
 import ReportIssueForm from '../../components/community/ReportIssueForm';
+import FAQModal from '../../components/community/FAQModal';
 import HistoricalTrends from '../../components/common/HistoricalTrends';
 import MetricsPage from './MetricsPage';
 import { firebaseAuthService } from '../../services/firebaseAuth';
@@ -20,6 +21,7 @@ interface WaterSafetyOverviewProps {
 function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'metrics' | 'profile'>('home');
   const [showReportForm, setShowReportForm] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
   const [timeRange, setTimeRange] = useState<7 | 30 | 90>(7);
 
   const { data: waterData, loading, error } = useWaterData();
@@ -32,10 +34,6 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
 
   const handleViewDetails = () => {
     setActiveTab('metrics');
-  };
-
-  const handleContactUtility = () => {
-    console.log('Contact utility');
   };
 
   const handleReportIssue = () => {
@@ -51,7 +49,11 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   };
 
   const handleViewFAQ = () => {
-    console.log('View FAQ');
+    setShowFAQ(true);
+  };
+
+  const handleCloseFAQ = () => {
+    setShowFAQ(false);
   };
 
   const handleNavigate = (tab: 'home' | 'metrics' | 'profile') => {
@@ -122,7 +124,6 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
 
             <div className="content-section">
               <CommunityActions
-                onContactUtility={handleContactUtility}
                 onReportIssue={handleReportIssue}
                 onViewFAQ={handleViewFAQ}
               />
@@ -133,6 +134,8 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
         {showReportForm && (
           <ReportIssueForm onClose={handleCloseReportForm} onSubmit={handleSubmitIssue} />
         )}
+
+        {showFAQ && <FAQModal onClose={handleCloseFAQ} />}
 
         {activeTab === 'metrics' && <MetricsPage />}
 

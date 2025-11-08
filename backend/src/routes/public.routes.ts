@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { statusCalculator } from '../services/status-calculator.service.js';
 import { waterDataService } from '../services/water-data.service.js';
 import { communityIssuesService } from '../services/community-issues.service.js';
+import { faqService } from '../services/faq.service.js';
 import { ErrorHandler } from '../middleware/error-handler.middleware.js';
 
 const router = Router();
@@ -157,6 +158,49 @@ router.post('/report-issue', ErrorHandler.asyncHandler(async (req: Request, res:
     success: true,
     data: issue,
     message: 'Issue reported successfully',
+  });
+}));
+
+router.get('/faq', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const categoryId = req.query.category as string | undefined;
+  const search = req.query.search as string | undefined;
+
+  if (categoryId) {
+    const category = faqService.getFAQByCategory(categoryId);
+    if (!category) {
+      res.status(404).json({
+        success: false,
+        error: `FAQ category '${categoryId}' not found`,
+      });
+      return;
+    }
+    res.json({
+      success: true,
+      data: category,
+    });
+    return;
+  }
+
+  if (search) {
+    const results = faqService.searchFAQs(search);
+    res.json({
+      success: true,
+      data: {
+        searchTerm: search,
+        results,
+        count: results.length,
+      },
+    });
+    return;
+  }
+
+  const allFAQs = faqService.getAllFAQs();
+  res.json({
+    success: true,
+    data: {
+      categories: allFAQs,
+      count: allFAQs.reduce((sum, cat) => sum + cat.questions.length, 0),
+    },
   });
 }));
 
