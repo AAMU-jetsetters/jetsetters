@@ -10,6 +10,7 @@ import MetricsPage from './MetricsPage';
 import ProfilePage from './ProfilePage';
 import NotificationsPage from './NotificationsPage';
 import { firebaseAuthService } from '../../services/firebaseAuth';
+import { notificationsApi } from '../../services/notificationsApi';
 import { useWaterData } from '../../hooks/useWaterData';
 import { useHistoricalData } from '../../hooks/useHistoricalData';
 import { mapRiskLevelToFrontend, formatDate } from '../../utils/dataMapper';
@@ -27,10 +28,33 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const [timeRange, setTimeRange] = useState<7 | 30 | 90>(7);
   const scrollPositionRef = useRef<number>(0);
   const isChangingRangeRef = useRef<boolean>(false);
-  const [hasNotification, setHasNotification] = useState(true);
+  const [hasNotification, setHasNotification] = useState(false);
 
   const { data: waterData, loading, error } = useWaterData();
   const { chemicalTrends, loading: historyLoading } = useHistoricalData(timeRange);
+
+  useEffect(() => {
+    const user = firebaseAuthService.getCurrentUser();
+    if (user && user.email && user.uid) {
+      notificationsApi.registerEmail(user.email, user.uid).catch(() => {
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const count = await notificationsApi.getUnreadCount();
+        setHasNotification(count > 0);
+      } catch (err) {
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const pHTrendData = chemicalTrends.pH?.map((point) => ({
     date: point.date,
@@ -86,7 +110,6 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
   const handleNavigate = (tab: 'home' | 'metrics' | 'profile' | 'notifications') => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    console.log('Navigate to:', tab);
   };
 
   const handleTimeRangeChange = (range: '7days' | '30days' | '90days') => {

@@ -3,6 +3,8 @@ import { statusCalculator } from '../services/status-calculator.service.js';
 import { waterDataService } from '../services/water-data.service.js';
 import { communityIssuesService } from '../services/community-issues.service.js';
 import { faqService } from '../services/faq.service.js';
+import { notificationsService } from '../services/notifications.service.js';
+import { userEmailsService } from '../services/user-emails.service.js';
 import { ErrorHandler } from '../middleware/error-handler.middleware.js';
 
 const router = Router();
@@ -201,6 +203,134 @@ router.get('/faq', ErrorHandler.asyncHandler(async (req: Request, res: Response)
       categories: allFAQs,
       count: allFAQs.reduce((sum, cat) => sum + cat.questions.length, 0),
     },
+  });
+}));
+
+router.post('/register-email', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const { email, userId } = req.body;
+
+  if (!email || !userId) {
+    res.status(400).json({
+      success: false,
+      error: 'Email and userId are required',
+    });
+    return;
+  }
+
+  const userEmail = userEmailsService.upsertUserEmail(email, userId);
+
+  res.json({
+    success: true,
+    data: userEmail,
+    message: 'Email registered successfully',
+  });
+}));
+
+router.get('/notifications', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 50;
+  const notifications = notificationsService.getAllNotifications(limit);
+
+  res.json({
+    success: true,
+    data: notifications,
+    count: notifications.length,
+  });
+}));
+
+router.get('/notifications/unread-count', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
+  const count = notificationsService.getUnreadCount();
+
+  res.json({
+    success: true,
+    data: { count },
+  });
+}));
+
+router.get('/notifications/:id', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    res.status(400).json({
+      success: false,
+      error: 'Invalid notification ID',
+    });
+    return;
+  }
+
+  try {
+    const notification = notificationsService.getNotificationById(id);
+    res.json({
+      success: true,
+      data: notification,
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Notification not found',
+    });
+  }
+}));
+
+router.patch('/notifications/:id/read', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    res.status(400).json({
+      success: false,
+      error: 'Invalid notification ID',
+    });
+    return;
+  }
+
+  try {
+    const notification = notificationsService.markAsRead(id);
+    res.json({
+      success: true,
+      data: notification,
+      message: 'Notification marked as read',
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Notification not found',
+    });
+  }
+}));
+
+router.patch('/notifications/read-all', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
+  const count = notificationsService.markAllAsRead();
+
+  res.json({
+    success: true,
+    data: { count },
+    message: `${count} notifications marked as read`,
+  });
+}));
+
+router.delete('/notifications/:id', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    res.status(400).json({
+      success: false,
+      error: 'Invalid notification ID',
+    });
+    return;
+  }
+
+  const deleted = notificationsService.deleteNotification(id);
+
+  if (!deleted) {
+    res.status(404).json({
+      success: false,
+      error: 'Notification not found',
+    });
+    return;
+  }
+
+  res.json({
+    success: true,
+    message: 'Notification deleted',
   });
 }));
 

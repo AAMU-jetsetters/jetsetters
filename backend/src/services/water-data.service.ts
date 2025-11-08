@@ -202,7 +202,7 @@ export class WaterDataService {
     });
 
     const riskPercentage = (totalRisk / maxRisk) * 100;
-    return Math.round(riskPercentage);
+    return Math.min(100, Math.round(riskPercentage));
   }
 
   private determineRiskLevel(index: number): OverallRiskLevel {
@@ -400,6 +400,130 @@ export class WaterDataService {
 
   public getHistory(limit: number = 100): TimeSeriesPoint[] {
     return this.dataHistory.slice(-limit);
+  }
+
+  public forceCriticalState(): void {
+    const now = new Date();
+    const criticalChemicals: ChemicalReading[] = [
+      {
+        parameter: 'pH',
+        value: 12.5,
+        unit: 'pH units',
+        status: 'anomaly',
+        timestamp: now,
+        note: 'Critical pH level',
+      },
+      {
+        parameter: 'chlorine',
+        value: 4.2,
+        unit: 'mg/L',
+        status: 'anomaly',
+        timestamp: now,
+        note: 'Critical chlorine level',
+      },
+      {
+        parameter: 'turbidity',
+        value: 9.5,
+        unit: 'NTU',
+        status: 'anomaly',
+        timestamp: now,
+        note: 'Critical turbidity level',
+      },
+      {
+        parameter: 'temperature',
+        value: 35,
+        unit: '°C',
+        status: 'anomaly',
+        timestamp: now,
+        note: 'Critical temperature',
+      },
+      {
+        parameter: 'lead',
+        value: 0.030,
+        unit: 'mg/L',
+        status: 'anomaly',
+        timestamp: now,
+        note: 'Critical lead level',
+      },
+    ];
+
+    const riskIndex = this.calculateRiskIndex(criticalChemicals);
+    
+    this.currentState = {
+      timestamp: now,
+      chemicals: criticalChemicals,
+      riskIndex,
+      anomalyContext: {
+        isActive: true,
+        severity: 'critical',
+        type: 'chemical',
+        affectedParameters: criticalChemicals.map((c) => c.parameter),
+        startTime: now,
+      },
+    };
+
+    this.dataHistory.push({ ...this.currentState });
+    if (this.dataHistory.length > 1000) {
+      this.dataHistory.shift();
+    }
+  }
+
+  public forceStableState(): void {
+    const now = new Date();
+    const stableChemicals: ChemicalReading[] = [
+      {
+        parameter: 'pH',
+        value: 7.5,
+        unit: 'pH units',
+        status: 'normal',
+        timestamp: now,
+      },
+      {
+        parameter: 'chlorine',
+        value: 1.0,
+        unit: 'mg/L',
+        status: 'normal',
+        timestamp: now,
+      },
+      {
+        parameter: 'turbidity',
+        value: 0.3,
+        unit: 'NTU',
+        status: 'normal',
+        timestamp: now,
+      },
+      {
+        parameter: 'temperature',
+        value: 20,
+        unit: '°C',
+        status: 'normal',
+        timestamp: now,
+      },
+      {
+        parameter: 'lead',
+        value: 0.005,
+        unit: 'mg/L',
+        status: 'normal',
+        timestamp: now,
+      },
+    ];
+
+    const riskIndex = this.calculateRiskIndex(stableChemicals);
+    
+    this.currentState = {
+      timestamp: now,
+      chemicals: stableChemicals,
+      riskIndex,
+      anomalyContext: {
+        isActive: false,
+        severity: 'low',
+      },
+    };
+
+    this.dataHistory.push({ ...this.currentState });
+    if (this.dataHistory.length > 1000) {
+      this.dataHistory.shift();
+    }
   }
 }
 
