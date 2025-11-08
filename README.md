@@ -19,14 +19,12 @@ Sentra is an AI-powered anomaly detection platform designed to protect small pub
 Sentra’s target customers are small public water systems — especially those in rural or underserved communities with limited IT staff and aging infrastructure. These operators often lack the resources to implement traditional cybersecurity solutions, leaving them vulnerable to service disruptions and costly post-attack recovery. Sentra delivers tangible benefits by providing AI-powered anomaly detection, real-time alerts, and public dashboards that run locally on edge devices — all with grant-aligned pricing and zero need for cloud access or cybersecurity expertise.
 
 ## Tech Overview 💻
-**... what tech was used to bring this project to life?**
-
-Example:
-* FastAPI
-* Hugging Face AI Models
-* Next.js
-* Java
-* ReactJS
+*Frontend:* React + TypeScript + Vite + Firebase Auth  
+*Backend:* Node.js + Express + SQLite + Python FastAPI  
+*ML:* Random Forest (99.1% AUC) + 145 features  
+*APIs:* OpenAI GPT-4, Firebase, Custom REST  
+*Design:* Dark mode, gradients, glassmorphism, responsive  
+*Security:* Firebase Auth + SMS MFA + reCAPTCHA  
 
 ### Link to Demo Presentation 📽
 [AAMU Jetsetters Presentation](https://www.canva.com/design/DAG4CyeQGW4/4sSfCAHA_S1LJHvV-ceS0Q/view?utm_content=DAG4CyeQGW4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0a938676b0)
