@@ -1,8 +1,7 @@
 .water-safety-page {
   min-height: 100vh;
-  background-color: #000000;
   font-family: 'Ubuntu', sans-serif;
-  padding-bottom: 80px; /* Space for bottom nav */
+  padding-bottom: 80px; 
 }
 
 .mobile-header {
@@ -10,16 +9,29 @@
   align-items: center;
   padding: 16px 24px;
   padding-top: max(16px, env(safe-area-inset-top));
-  background-color: #000000;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
+}
+
+[data-theme="light"] .mobile-header {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .header-icon {
-  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.header-icon svg {
+.header-logo {
   width: 32px;
   height: 32px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(67%) sepia(48%) saturate(449%) hue-rotate(122deg) brightness(94%) contrast(88%);
 }
 
 .page-content {
@@ -32,10 +44,15 @@
 }
 
 .placeholder-content {
-  background-color: #1a1a1a;
+  background: 
+    linear-gradient(135deg, rgba(26, 26, 46, 0.6), rgba(15, 52, 96, 0.4)),
+    rgba(26, 26, 46, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: 16px;
   padding: 32px 24px;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
 }
 
 .placeholder-content h2 {
@@ -54,12 +71,17 @@
 }
 
 .profile-content {
-  background-color: #1a1a1a;
+  background: 
+    linear-gradient(135deg, rgba(26, 26, 46, 0.6), rgba(15, 52, 96, 0.4)),
+    rgba(26, 26, 46, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: 16px;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
 }
 
 .profile-title {
@@ -118,7 +140,7 @@
     padding: 24px;
   }
 
-  .header-icon svg {
+  .header-logo {
     width: 40px;
     height: 40px;
   }
@@ -134,7 +156,6 @@
   }
 }
 
-/* Large Desktop */
 @media (min-width: 1024px) {
   .content-section {
     padding: 0 40px 40px;

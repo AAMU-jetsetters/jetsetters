@@ -11,7 +11,6 @@ function AdminHeader({ pageTitle, onLogout }: AdminHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -32,8 +31,8 @@ function AdminHeader({ pageTitle, onLogout }: AdminHeaderProps) {
     <header className="admin-header">
       <div className="admin-header-content">
         <div className="admin-header-left">
-          <Logo size="medium" showText={true} />
-          <span className="admin-dashboard-label">Admin Dashboard</span>
+          <Logo size="medium" showText={false} />
+          <span className="admin-dashboard-label">Operator Dashboard</span>
         </div>
         <h1 className="admin-page-title">{pageTitle}</h1>
         <div className="admin-header-right" ref={dropdownRef}>

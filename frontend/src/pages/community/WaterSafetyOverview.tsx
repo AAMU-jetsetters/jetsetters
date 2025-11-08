@@ -72,9 +72,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
     <div className="water-safety-page">
       <header className="mobile-header">
         <div className="header-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-          </svg>
+          <img src="/src/assets/sentra_icon.png" alt="Sentra" className="header-logo" />
         </div>
       </header>
 

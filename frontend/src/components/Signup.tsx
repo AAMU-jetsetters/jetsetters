@@ -1,25 +1,33 @@
-import { useState } from 'react';
-import { authService } from '../services/authService';
+import { useState, useEffect } from 'react';
+import { adminFirebaseAuth } from '../services/adminFirebaseAuth';
 import './Signup.css';
 
 interface SignupProps {
-  onSignupSuccess?: (email: string) => void;
+  onSignupSuccess?: (email: string, verificationId?: string, userId?: string) => void;
   onNavigateToLogin?: () => void;
 }
 
 function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Initialize invisible reCAPTCHA
+    adminFirebaseAuth.initRecaptcha('recaptcha-container-signup', true);
+    
+    return () => {
+      adminFirebaseAuth.clearRecaptcha();
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -30,22 +38,40 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
       return;
     }
 
-    if (!phoneNumber.match(/^\+?[1-9]\d{1,14}$/)) {
-      setError('Please enter a valid phone number');
+    if (!phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
+      setError('Please enter a valid phone number (e.g., +1234567890)');
       return;
     }
 
-    const result = authService.signup(email, username, password, phoneNumber);
+    setLoading(true);
 
-    if (!result.success) {
-      setError(result.message);
+    // Step 1: Create user account
+    const signupResult = await adminFirebaseAuth.signupWithEmail(email, password);
+
+    if (!signupResult.success || !signupResult.user) {
+      setLoading(false);
+      setError(signupResult.error || 'Signup failed. Please try again.');
       return;
     }
 
-    console.log('Signup initiated, 2FA code:', result.code);
+    // Step 2: Enroll MFA with phone number
+    const enrollResult = await adminFirebaseAuth.enrollMFA(
+      signupResult.user,
+      phoneNumber,
+      'recaptcha-container-signup'
+    );
+
+    setLoading(false);
+
+    if (!enrollResult.success) {
+      setError(enrollResult.error || 'Failed to send verification code. Please try again.');
+      return;
+    }
+
+    console.log('Signup successful, SMS code sent to:', phoneNumber);
     
-    if (onSignupSuccess) {
-      onSignupSuccess(email);
+    if (onSignupSuccess && enrollResult.verificationId) {
+      onSignupSuccess(email, enrollResult.verificationId, signupResult.user.uid);
     }
   };
 
@@ -53,15 +79,15 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
     <div className="signup-container">
       <div className="signup-card">
         <div className="logo-section">
-          <div className="logo-circle">
-            <span className="logo-icon">✈️</span>
-          </div>
-          <h2 className="brand-name">JetSetters</h2>
+          <img src="/src/assets/sentra_logo.png" alt="Sentra" className="auth-logo" />
         </div>
         
         <h1 className="signup-title">Create Account</h1>
-        <p className="signup-subtitle">Join our secure travel community</p>
+        <p className="signup-subtitle">Secure your account with SMS verification</p>
         
+        {/* Hidden reCAPTCHA container */}
+        <div id="recaptcha-container-signup"></div>
+
         <form onSubmit={handleSubmit} className="signup-form">
           {error && <div className="error-message">{error}</div>}
 
@@ -77,27 +103,13 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="username" className="form-label">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              className="form-input"
-              placeholder="Choose a username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+              disabled={loading}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="phoneNumber" className="form-label">
-              Phone Number
+              Phone Number (for SMS verification)
             </label>
             <input
               type="tel"
@@ -107,7 +119,9 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               required
+              disabled={loading}
             />
+            <small className="input-hint">Include country code (e.g., +1 for US)</small>
           </div>
 
           <div className="form-group">
@@ -118,10 +132,11 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
               type="password"
               id="password"
               className="form-input"
-              placeholder="Create a password"
+              placeholder="Create a password (min. 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -137,11 +152,12 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
-          <button type="submit" className="signup-button">
-            Sign Up
+          <button type="submit" className="signup-button" disabled={loading}>
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
 
           <div className="navigation-links">
@@ -150,6 +166,7 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
               type="button" 
               className="nav-link"
               onClick={onNavigateToLogin}
+              disabled={loading}
             >
               Log In
             </button>

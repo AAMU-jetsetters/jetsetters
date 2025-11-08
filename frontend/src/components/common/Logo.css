@@ -4,17 +4,24 @@
   gap: 10px;
 }
 
-.logo-circle {
-  background: linear-gradient(135deg, #14b8a6 0%, #0f9b8e 100%);
-  border-radius: 50%;
+.logo-image-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+  flex-shrink: 0;
 }
 
-.logo-icon {
+.logo-image {
   display: block;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(67%) sepia(48%) saturate(449%) hue-rotate(122deg) brightness(94%) contrast(88%);
+}
+
+.logo-image-full {
+  display: block;
+  object-fit: contain;
+  height: auto;
+  filter: brightness(0) saturate(100%) invert(67%) sepia(48%) saturate(449%) hue-rotate(122deg) brightness(94%) contrast(88%);
 }
 
 .logo-text {
@@ -25,42 +32,57 @@
 }
 
 /* Size variants */
-.logo-component.small .logo-circle {
+.logo-component.small .logo-image-container {
   width: 32px;
   height: 32px;
 }
 
-.logo-component.small .logo-icon {
-  font-size: 16px;
+.logo-component.small .logo-image {
+  width: 32px;
+  height: 32px;
 }
 
 .logo-component.small .logo-text {
   font-size: 16px;
 }
 
-.logo-component.medium .logo-circle {
+.logo-component.small.full-logo .logo-image-full {
+  width: 100px;
+}
+
+.logo-component.medium .logo-image-container {
   width: 40px;
   height: 40px;
 }
 
-.logo-component.medium .logo-icon {
-  font-size: 20px;
+.logo-component.medium .logo-image {
+  width: 40px;
+  height: 40px;
 }
 
 .logo-component.medium .logo-text {
   font-size: 20px;
 }
 
-.logo-component.large .logo-circle {
+.logo-component.medium.full-logo .logo-image-full {
+  width: 120px;
+}
+
+.logo-component.large .logo-image-container {
   width: 50px;
   height: 50px;
 }
 
-.logo-component.large .logo-icon {
-  font-size: 25px;
+.logo-component.large .logo-image {
+  width: 50px;
+  height: 50px;
 }
 
 .logo-component.large .logo-text {
   font-size: 24px;
+}
+
+.logo-component.large.full-logo .logo-image-full {
+  width: 150px;
 }
 
