@@ -18,16 +18,28 @@ def load_model():
     global model, scaler, feature_names, model_loaded
     
     try:
-        base_path = Path(__file__).parent.parent.parent.parent
-        models_dir = base_path / 'models'
+        script_path = Path(__file__).resolve()
+        possible_paths = [
+            script_path.parent.parent.parent.parent / 'models',
+            script_path.parent.parent.parent / 'models',
+            Path.cwd().parent / 'models',
+            Path.cwd() / 'models',
+            Path('/app/models'),
+        ]
+        
+        models_dir = None
+        for path in possible_paths:
+            if (path / 'random_forest_model.pkl').exists():
+                models_dir = path
+                break
+        
+        if not models_dir:
+            print(f"Error: Model files not found. Checked: {possible_paths}", file=sys.stderr)
+            return False
         
         model_path = models_dir / 'random_forest_model.pkl'
         scaler_path = models_dir / 'feature_scaler.pkl'
         feature_names_path = models_dir / 'feature_names.pkl'
-        
-        if not model_path.exists():
-            print(f"Error: Model file not found at {model_path}", file=sys.stderr)
-            return False
         
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
