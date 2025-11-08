@@ -26,7 +26,9 @@ function HistoricalTrends({
 }: HistoricalTrendsProps) {
   const [selectedRange, setSelectedRange] = useState(timeRange);
 
-  const handleRangeChange = (range: '7days' | '30days' | '90days') => {
+  const handleRangeChange = (e: React.MouseEvent, range: '7days' | '30days' | '90days') => {
+    e.preventDefault();
+    e.stopPropagation();
     setSelectedRange(range);
     if (onTimeRangeChange) {
       onTimeRangeChange(range);
@@ -43,20 +45,23 @@ function HistoricalTrends({
         <h3 className="trends-title">{title}</h3>
         <div className="time-range-selector">
           <button
+            type="button"
             className={`range-btn ${selectedRange === '7days' ? 'active' : ''}`}
-            onClick={() => handleRangeChange('7days')}
+            onClick={(e) => handleRangeChange(e, '7days')}
           >
             7 Days
           </button>
           <button
+            type="button"
             className={`range-btn ${selectedRange === '30days' ? 'active' : ''}`}
-            onClick={() => handleRangeChange('30days')}
+            onClick={(e) => handleRangeChange(e, '30days')}
           >
             30 Days
           </button>
           <button
+            type="button"
             className={`range-btn ${selectedRange === '90days' ? 'active' : ''}`}
-            onClick={() => handleRangeChange('90days')}
+            onClick={(e) => handleRangeChange(e, '90days')}
           >
             3 Months
           </button>

@@ -1,8 +1,8 @@
 import './BottomNav.css';
 
 interface BottomNavProps {
-  activeTab: 'home' | 'metrics' | 'profile';
-  onNavigate: (tab: 'home' | 'metrics' | 'profile') => void;
+  activeTab: 'home' | 'metrics' | 'profile' | 'notifications';
+  onNavigate: (tab: 'home' | 'metrics' | 'profile' | 'notifications') => void;
 }
 
 function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
