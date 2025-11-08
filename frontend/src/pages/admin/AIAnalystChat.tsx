@@ -1,78 +1,176 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../../components/admin/ChatMessage';
 import ModelOutput from '../../components/admin/ModelOutput';
 import LogDataPanel from '../../components/admin/LogDataPanel';
+import { openAIService } from '../../services/openai.service';
+import { chatbotConfig } from '../../config/chatbot.config';
 import './AIAnalystChat.css';
 
+interface Message {
+  id: string;
+  role: 'user' | 'ai';
+  content: string;
+}
+
 function AIAnalystChat() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      role: 'ai' as const,
-      content: 'Hello, how can I assist you with incident analysis today?',
-    },
-    {
-      id: '2',
-      role: 'user' as const,
-      content: 'What caused the recent pressure drop in DMA 3?',
-    },
-    {
-      id: '3',
-      role: 'ai' as const,
-      content:
-        'Analyzing sensor data from J14 and Model Output, the pressure drop in DMA 3 was initiated by a sudden valve closure at node V7 at 14:35 UTC, likely due to an automated response to a detected leak. Logs from SCADA confirm the valve operation. Further forensics indicate a transient pressure wave affecting downstream sensors.',
-    },
-    {
-      id: '4',
-      role: 'user' as const,
-      content: 'Recommend steps to isolate Tank 4 safely.',
-    },
-    {
-      id: '5',
-      role: 'ai' as const,
-      content:
-        'To safely isolate Tank 4: First, verify current flow rates and levels. Close inlet valve V12 and outlet valve V13. Monitor pressure changes in connected pipelines. Alert maintenance for physical inspection. Confirm isolation via SCADA. Always follow standard operating procedures for critical asset isolation.',
+      role: 'ai',
+      content: 'Hello! I\'m your AI Analyst for Sentra water quality monitoring. I can help you analyze anomalies, diagnose issues, and provide insights on water quality data. How can I assist you today?',
     },
   ]);
 
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [showSuggestedPrompts, setShowSuggestedPrompts] = useState(true);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const suggestedPrompts = [
-    'Explain current alert in simple terms',
-    'Find root cause of pressure drop in DMA 3',
-    'Recommend steps to isolate Tank 4',
-    'Summarize recent network anomalies',
-    'Predict impact of system restart',
-  ];
+  const suggestedPrompts = chatbotConfig.predefinedPrompts;
 
-  const handleSendMessage = () => {
-    if (inputValue.trim()) {
-      const newMessage = {
+  useEffect(() => {
+    if (shouldAutoScroll && !isStreaming && messagesEndRef.current) {
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  }, [messages, shouldAutoScroll, isStreaming]);
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShouldAutoScroll(isNearBottom);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (inputValue.trim() && !isLoading) {
+      const userMessage = inputValue.trim();
+      const newMessage: Message = {
         id: Date.now().toString(),
-        role: 'user' as const,
-        content: inputValue,
+        role: 'user',
+        content: userMessage,
       };
-      setMessages([...messages, newMessage]);
+      setMessages((prev) => [...prev, newMessage]);
       setInputValue('');
+      setIsLoading(true);
 
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse = {
+      if (!openAIService.isConfigured()) {
+        const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
-          role: 'ai' as const,
-          content: 'I understand your query. Let me analyze the data and provide you with insights...',
+          role: 'ai',
+          content: '⚠️ OpenAI API key not configured. Please add your API key to the .env file and restart the server.\n\nAdd this to frontend/.env:\nVITE_OPENAI_API_KEY=your-api-key-here',
         };
+        setMessages((prev) => [...prev, errorMessage]);
+        setIsLoading(false);
+        return;
+      }
+
+      if (chatbotConfig.hyperparameters.streamResponse) {
+        setIsStreaming(true);
+        setShouldAutoScroll(true);
+        const streamingMessageId = (Date.now() + 1).toString();
+        let fullContent = '';
+
+        const streamingMessage: Message = {
+          id: streamingMessageId,
+          role: 'ai',
+          content: '',
+        };
+        setMessages((prev) => [...prev, streamingMessage]);
+
+        try {
+          const stream = openAIService.streamMessage(userMessage);
+
+          for await (const chunk of stream) {
+            if (!chunk.done && chunk.content) {
+              fullContent += chunk.content;
+              setMessages((prev) => 
+                prev.map((msg) =>
+                  msg.id === streamingMessageId
+                    ? { ...msg, content: fullContent }
+                    : msg
+                )
+              );
+              
+              if (shouldAutoScroll && messagesContainerRef.current) {
+                const container = messagesContainerRef.current;
+                container.scrollTop = container.scrollHeight;
+              }
+            }
+          }
+        } catch (error: any) {
+          console.error('Streaming error:', error);
+          setMessages((prev) => 
+            prev.map((msg) =>
+              msg.id === streamingMessageId
+                ? { ...msg, content: `Error: ${error.message || 'Failed to get response'}` }
+                : msg
+            )
+          );
+        }
+
+        setIsStreaming(false);
+        setIsLoading(false);
+      } else {
+        const response = await openAIService.sendMessage(userMessage);
+
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'ai',
+          content: response.success 
+            ? response.message || 'No response received'
+            : `Error: ${response.error || 'Failed to get response'}`,
+        };
+
         setMessages((prev) => [...prev, aiResponse]);
-      }, 1000);
+        setIsLoading(false);
+      }
     }
   };
 
   const handleSuggestedPrompt = (prompt: string) => {
     setInputValue(prompt);
+    setShowSuggestedPrompts(false);
   };
 
-  const handleGenerateSummary = () => {
-    console.log('Generating incident summary...');
+  const handleGenerateSummary = async () => {
+    setIsLoading(true);
+    const summaryPrompt = 'Generate a comprehensive incident summary based on current anomalies, alerts, and system status. Include severity assessment, affected areas, and recommended actions.';
+    
+    if (!openAIService.isConfigured()) {
+      alert('OpenAI API key not configured. Please add your API key to the .env file.');
+      setIsLoading(false);
+      return;
+    }
+
+    const response = await openAIService.sendMessage(summaryPrompt);
+    
+    if (response.success && response.message) {
+      const summaryMessage: Message = {
+        id: Date.now().toString(),
+        role: 'ai',
+        content: `**Incident Summary:**\n\n${response.message}`,
+      };
+      setMessages((prev) => [...prev, summaryMessage]);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleClearChat = () => {
+    openAIService.clearHistory();
+    setMessages([
+      {
+        id: '1',
+        role: 'ai',
+        content: 'Chat history cleared. How can I assist you?',
+      },
+    ]);
   };
 
   return (
@@ -82,22 +180,42 @@ function AIAnalystChat() {
           <h2 className="chat-title">AI Analyst</h2>
         </div>
 
-        <div className="chat-messages">
+        <div 
+          className={`chat-messages ${isStreaming ? 'streaming' : ''}`} 
+          ref={messagesContainerRef} 
+          onScroll={handleScroll}
+        >
           {messages.map((message) => (
             <ChatMessage key={message.id} role={message.role} content={message.content} />
           ))}
+          {isLoading && !isStreaming && (
+            <div className="typing-indicator">
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="suggested-prompts">
-          {suggestedPrompts.map((prompt, index) => (
-            <button
-              key={index}
-              className="prompt-button"
-              onClick={() => handleSuggestedPrompt(prompt)}
-            >
-              {prompt}
-            </button>
-          ))}
+        {showSuggestedPrompts && (
+          <div className="suggested-prompts">
+            {suggestedPrompts.map((prompt, index) => (
+              <button
+                key={index}
+                className="prompt-button"
+                onClick={() => handleSuggestedPrompt(prompt)}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="chat-controls">
+          <button className="clear-chat-btn" onClick={handleClearChat} disabled={isLoading}>
+            Clear Chat
+          </button>
         </div>
 
         <div className="chat-input-container">
@@ -107,9 +225,15 @@ function AIAnalystChat() {
             placeholder="Message AI Analyst..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
+            disabled={isLoading}
           />
-          <button className="send-button" onClick={handleSendMessage} aria-label="Send message">
+          <button 
+            className="send-button" 
+            onClick={handleSendMessage} 
+            disabled={isLoading || !inputValue.trim()}
+            aria-label="Send message"
+          >
             <svg
               width="20"
               height="20"
@@ -127,8 +251,12 @@ function AIAnalystChat() {
       </div>
 
       <div className="ai-right-panel">
-        <button className="generate-summary-btn" onClick={handleGenerateSummary}>
-          Generate Incident Summary
+        <button 
+          className="generate-summary-btn" 
+          onClick={handleGenerateSummary}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Generating...' : 'Generate Incident Summary'}
         </button>
 
         <ModelOutput

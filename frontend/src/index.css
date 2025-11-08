@@ -8,7 +8,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
-  /* Light Mode Colors */
   --bg-primary-light: #ffffff;
   --bg-secondary-light: #f8f9fa;
   --text-primary-light: #1a1a1a;
@@ -16,7 +15,6 @@
   --card-bg-light: #ffffff;
   --border-light: #e5e7eb;
   
-  /* Dark Mode - Futuristic Gradient Colors */
   --bg-gradient-dark-1: #0a0e27;
   --bg-gradient-dark-2: #16213e;
   --bg-gradient-dark-3: #0f3460;
@@ -91,6 +89,10 @@ body::before {
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto !important;
 }
 
 #root {
