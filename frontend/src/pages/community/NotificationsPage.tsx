@@ -34,7 +34,8 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
     setNotifications((prev) =>
       prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
     );
-    } catch (err) {
+    } catch {
+      // Silently handle errors
     }
   };
 
@@ -47,7 +48,8 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
     if (onMarkAllRead) {
       onMarkAllRead();
       }
-    } catch (err) {
+    } catch {
+      // Silently handle errors
     }
   };
 
@@ -55,7 +57,8 @@ function NotificationsPage({ onMarkAllRead }: NotificationsPageProps) {
     try {
       await notificationsApi.deleteNotification(id);
     setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-    } catch (err) {
+    } catch {
+      // Silently handle errors
     }
   };
 

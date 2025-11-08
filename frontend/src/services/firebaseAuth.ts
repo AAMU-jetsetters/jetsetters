@@ -27,7 +27,6 @@ export const firebaseAuthService = {
         email,
         password
       );
-      console.log('User created:', userCredential.user.email);
       return { success: true, user: userCredential.user };
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -45,7 +44,6 @@ export const firebaseAuthService = {
         email,
         password
       );
-      console.log('User logged in:', userCredential.user.email);
       return { success: true, user: userCredential.user };
     } catch (error: any) {
       console.error('Login error:', error);
@@ -56,7 +54,6 @@ export const firebaseAuthService = {
   signInWithGoogle: async (): Promise<AuthResult> => {
     try {
       const result: UserCredential = await signInWithPopup(auth, googleProvider);
-      console.log('Google sign-in successful:', result.user.email);
       return { success: true, user: result.user };
     } catch (error: any) {
       console.error('Google sign-in error:', error);
@@ -67,7 +64,6 @@ export const firebaseAuthService = {
   logout: async (): Promise<AuthResult> => {
     try {
       await signOut(auth);
-      console.log('User logged out');
       return { success: true };
     } catch (error: any) {
       console.error('Logout error:', error);

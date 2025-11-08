@@ -8,7 +8,7 @@ interface HealthAdvisoryProps {
 
 function HealthAdvisory({ advisory, updatedAt, onViewDetails }: HealthAdvisoryProps) {
   return (
-    <div className="health-advisory">
+    <div className="health-advisory" data-tour="health-advisory">
       <div className="advisory-header">
         <h2 className="advisory-title">Health Advisory</h2>
         <button className="info-icon" aria-label="More information">

@@ -10,9 +10,7 @@ interface ChartWidgetProps {
 
 function ChartWidget({ 
   title = 'Multi-Series Sensor Data with Anomaly Score', 
-  showLiveBadge = true,
-  sensorData: _sensorData = [],
-  loading: _loading = false
+  showLiveBadge = true
 }: ChartWidgetProps) {
   return (
     <div className="chart-widget">

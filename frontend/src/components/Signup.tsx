@@ -68,7 +68,6 @@ function Signup({ onSignupSuccess, onNavigateToLogin }: SignupProps) {
       return;
     }
 
-    console.log('Signup successful, SMS code sent to:', phoneNumber);
     
     if (onSignupSuccess && enrollResult.verificationId) {
       onSignupSuccess(email, enrollResult.verificationId, signupResult.user.uid);
