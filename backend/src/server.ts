@@ -59,10 +59,10 @@ notificationMonitorService.startMonitoring(updateInterval, enableDemoChecks);
 let mlServiceProcess: ReturnType<typeof spawn> | null = null;
 
 const startMLService = () => {
-  const mlServicePath = path.join(__dirname, 'services', 'ml-inference-service.py');
   const mlServicePort = process.env.ML_SERVICE_PORT || '5000';
-  
   process.env.ML_SERVICE_PORT = mlServicePort;
+  
+  const mlServicePath = path.join(__dirname, '..', 'src', 'services', 'ml-inference-service.py');
   
   mlServiceProcess = spawn('python3', [mlServicePath], {
     cwd: path.join(__dirname, '..'),
