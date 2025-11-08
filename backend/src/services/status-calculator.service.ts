@@ -25,7 +25,6 @@ export class StatusCalculatorService {
     chemicals: ChemicalReading[]
   ): HealthAdvisory {
     const criticalChemicals = chemicals.filter((c) => c.status === 'anomaly');
-    const warningChemicals = chemicals.filter((c) => c.status === 'warning');
 
     let message = '';
     let instructions = '';

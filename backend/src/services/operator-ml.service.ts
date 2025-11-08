@@ -48,7 +48,7 @@ export class OperatorMLService {
         type: this.mapTypeToAnomalyType(anomalyType),
         startTime: new Date(),
       },
-      predictions: modelOutput.predictions || {},
+      predictions: (modelOutput.predictions || {}) as Record<string, unknown>,
     };
   }
 

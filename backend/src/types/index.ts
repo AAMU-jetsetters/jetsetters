@@ -1,4 +1,3 @@
-// Chemical Parameter Types
 export type ChemicalParameter = 
   | 'chlorine'
   | 'pH'
@@ -9,13 +8,12 @@ export type ChemicalParameter =
 export type ParameterStatus = 'normal' | 'warning' | 'anomaly';
 
 export type OverallRiskLevel = 
-  | 'stable'      // Normal - Green
-  | 'low'         // Moderate Risk - Yellow
-  | 'moderate'    // Orange
-  | 'high'        // Red-Orange
-  | 'critical';   // Red Flashing
+  | 'stable'
+  | 'low'
+  | 'moderate'
+  | 'high'
+  | 'critical';
 
-// Chemical Reading Interface
 export interface ChemicalReading {
   parameter: ChemicalParameter;
   value: number;
@@ -25,15 +23,13 @@ export interface ChemicalReading {
   note?: string;
 }
 
-// Overall Water Risk Index
 export interface WaterRiskIndex {
-  index: number; // 0-100 percentage
+  index: number;
   level: OverallRiskLevel;
   timestamp: Date;
   description: string;
 }
 
-// Public Dashboard Status Response
 export interface PublicStatusResponse {
   overallRisk: WaterRiskIndex;
   chemicals: ChemicalReading[];
@@ -41,14 +37,12 @@ export interface PublicStatusResponse {
   lastUpdated: Date;
 }
 
-// Health Advisory
 export interface HealthAdvisory {
   message: string;
   instructions: string;
   updatedAt: Date;
 }
 
-// Anomaly Context (for correlating with ML model)
 export interface AnomalyContext {
   isActive: boolean;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -57,7 +51,6 @@ export interface AnomalyContext {
   startTime?: Date;
 }
 
-// Time Series Data Point
 export interface TimeSeriesPoint {
   timestamp: Date;
   chemicals: ChemicalReading[];
@@ -65,16 +58,40 @@ export interface TimeSeriesPoint {
   anomalyContext: AnomalyContext;
 }
 
-// Demo Attack Scenario
 export interface AttackScenario {
   id: string;
   name: string;
   type: 'chemical' | 'network' | 'physical';
-  duration: number; // minutes
+  duration: number;
   effects: {
     parameter: ChemicalParameter;
     targetValue: number;
-    progressionRate: number; // change per minute
+    progressionRate: number;
   }[];
+}
+
+export type IssuePriority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type IssueStatus = 'new' | 'acknowledged' | 'resolved';
+
+export interface CommunityIssue {
+  id: number;
+  issueType: string;
+  description: string;
+  location: string;
+  priority: IssuePriority;
+  contactEmail?: string;
+  contactPhone?: string;
+  status: IssueStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SubmitIssueRequest {
+  issueType: string;
+  description: string;
+  location: string;
+  priority: IssuePriority;
+  contactEmail?: string;
+  contactPhone?: string;
 }
 

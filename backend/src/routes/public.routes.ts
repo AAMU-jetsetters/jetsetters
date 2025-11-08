@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { statusCalculator } from '../services/status-calculator.service.js';
 import { waterDataService } from '../services/water-data.service.js';
+import { communityIssuesService } from '../services/community-issues.service.js';
 import { ErrorHandler } from '../middleware/error-handler.middleware.js';
 
 const router = Router();
 
-router.get('/status', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.get('/status', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   const status = statusCalculator.getPublicStatus();
   res.json({
     success: true,
@@ -25,7 +26,7 @@ router.get('/status', ErrorHandler.asyncHandler(async (req: Request, res: Respon
   });
 }));
 
-router.get('/risk-index', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.get('/risk-index', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   const riskIndex = waterDataService.getWaterRiskIndex();
   res.json({
     success: true,
@@ -40,7 +41,7 @@ router.get('/risk-index', ErrorHandler.asyncHandler(async (req: Request, res: Re
   });
 }));
 
-router.get('/chemicals', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.get('/chemicals', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   const currentState = waterDataService.getCurrentState();
   res.json({
     success: true,
@@ -50,7 +51,7 @@ router.get('/chemicals', ErrorHandler.asyncHandler(async (req: Request, res: Res
   });
 }));
 
-router.get('/health-advisory', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.get('/health-advisory', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   const status = statusCalculator.getPublicStatus();
   res.json({
     success: true,
@@ -62,19 +63,21 @@ router.post('/demo/attack', ErrorHandler.asyncHandler(async (req: Request, res: 
   const { scenarioId } = req.body;
   
   if (!scenarioId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: 'scenarioId is required',
     });
+    return;
   }
 
   const success = waterDataService.triggerAttack(scenarioId);
   
   if (!success) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: 'Attack scenario not found',
     });
+    return;
   }
 
   res.json({
@@ -83,7 +86,7 @@ router.post('/demo/attack', ErrorHandler.asyncHandler(async (req: Request, res: 
   });
 }));
 
-router.post('/demo/reset', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.post('/demo/reset', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   waterDataService.resetToBaseline();
   res.json({
     success: true,
@@ -91,7 +94,7 @@ router.post('/demo/reset', ErrorHandler.asyncHandler(async (req: Request, res: R
   });
 }));
 
-router.get('/demo/scenarios', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+router.get('/demo/scenarios', ErrorHandler.asyncHandler(async (_req: Request, res: Response) => {
   const scenarios = waterDataService.getAttackScenarios();
   res.json({
     success: true,
@@ -118,6 +121,42 @@ router.get('/history', ErrorHandler.asyncHandler(async (req: Request, res: Respo
   res.json({
     success: true,
     data: formattedHistory,
+  });
+}));
+
+router.post('/report-issue', ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+  const { issueType, description, location, priority, contactEmail, contactPhone } = req.body;
+
+  if (!issueType || !description || !location || !priority) {
+    res.status(400).json({
+      success: false,
+      error: 'Missing required fields: issueType, description, location, priority',
+    });
+    return;
+  }
+
+  const validPriorities = ['Low', 'Medium', 'High', 'Urgent'];
+  if (!validPriorities.includes(priority)) {
+    res.status(400).json({
+      success: false,
+      error: `Invalid priority. Must be one of: ${validPriorities.join(', ')}`,
+    });
+    return;
+  }
+
+  const issue = communityIssuesService.submitIssue({
+    issueType,
+    description,
+    location,
+    priority,
+    contactEmail,
+    contactPhone,
+  });
+
+  res.status(201).json({
+    success: true,
+    data: issue,
+    message: 'Issue reported successfully',
   });
 }));
 

@@ -4,7 +4,6 @@ import {
   ParameterStatus,
   OverallRiskLevel,
   WaterRiskIndex,
-  AnomalyContext,
   TimeSeriesPoint,
   AttackScenario,
 } from '../types/index.js';
