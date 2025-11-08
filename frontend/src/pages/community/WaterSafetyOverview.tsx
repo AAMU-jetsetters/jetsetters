@@ -46,9 +46,7 @@ function WaterSafetyOverview({ onLogout }: WaterSafetyOverviewProps) {
     setShowReportForm(false);
   };
 
-  const handleSubmitIssue = (issue: IssueData) => {
-    console.log('Issue submitted:', issue);
-    alert('Thank you! Your report has been submitted successfully.');
+  const handleSubmitIssue = (_issue: IssueData) => {
     setShowReportForm(false);
   };
 

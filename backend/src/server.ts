@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import publicRoutes from './routes/public.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 import { waterDataService } from './services/water-data.service.js';
 import { ErrorHandler } from './middleware/error-handler.middleware.js';
 
@@ -17,12 +18,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/public', publicRoutes);
+app.use('/api/admin', adminRoutes);
 app.use(ErrorHandler.handle);
 
 const updateInterval = parseInt(process.env.DATA_UPDATE_INTERVAL_MS || '60000', 10);
@@ -39,6 +41,7 @@ waterDataService.startDataGeneration(updateInterval);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Public API: http://localhost:${PORT}/api/public`);
+  console.log(`Admin API: http://localhost:${PORT}/api/admin`);
   console.log(`Health check: http://localhost:${PORT}/health`);
 });
 
